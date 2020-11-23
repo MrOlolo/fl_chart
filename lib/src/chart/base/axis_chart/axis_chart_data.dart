@@ -169,8 +169,10 @@ class AxisTitle with EquatableMixin {
       showTitle: b.showTitle,
       titleText: b.titleText,
       reservedSize: lerpDouble(a.reservedSize, b.reservedSize, t),
-      textStyle: TextStyle.lerp(a.textStyle.copyWith(fontSize: a.textStyle.fontSize),
-          b.textStyle.copyWith(fontSize: b.textStyle.fontSize), t),
+      textStyle: TextStyle.lerp(
+          a.textStyle.copyWith(fontSize: a.textStyle.fontSize),
+          b.textStyle.copyWith(fontSize: b.textStyle.fontSize),
+          t),
       textAlign: b.textAlign,
       margin: lerpDouble(a.margin, b.margin, t),
     );
@@ -204,10 +206,12 @@ class FlTitlesData with EquatableMixin {
     SideTitles rightTitles,
     SideTitles bottomTitles,
   })  : show = show ?? true,
-        leftTitles = leftTitles ?? SideTitles(reservedSize: 40, showTitles: true),
+        leftTitles =
+            leftTitles ?? SideTitles(reservedSize: 40, showTitles: true),
         topTitles = topTitles ?? SideTitles(reservedSize: 6),
         rightTitles = rightTitles ?? SideTitles(reservedSize: 40),
-        bottomTitles = bottomTitles ?? SideTitles(reservedSize: 22, showTitles: true);
+        bottomTitles =
+            bottomTitles ?? SideTitles(reservedSize: 22, showTitles: true);
 
   /// Lerps a [FlTitlesData] based on [t] value, check [Tween.lerp].
   static FlTitlesData lerp(FlTitlesData a, FlTitlesData b, double t) {
@@ -232,14 +236,14 @@ class FlTitlesData with EquatableMixin {
 }
 
 /// Determines showing or hiding specified title.
-typedef CheckToShowTitle = bool Function(
-    double minValue, double maxValue, SideTitles sideTitles, double appliedInterval, double value);
+typedef CheckToShowTitle = bool Function(double minValue, double maxValue,
+    SideTitles sideTitles, double appliedInterval, double value);
 
 /// The default [SideTitles.checkToShowTitle] function.
 ///
 /// It determines showing or not showing specific title.
-bool defaultCheckToShowTitle(
-    double minValue, double maxValue, SideTitles sideTitles, double appliedInterval, double value) {
+bool defaultCheckToShowTitle(double minValue, double maxValue,
+    SideTitles sideTitles, double appliedInterval, double value) {
   if ((maxValue - minValue) % appliedInterval == 0) {
     return true;
   }
@@ -459,7 +463,8 @@ class FlGridData with EquatableMixin {
     return FlGridData(
       show: b.show,
       drawHorizontalLine: b.drawHorizontalLine,
-      horizontalInterval: lerpDouble(a.horizontalInterval, b.horizontalInterval, t),
+      horizontalInterval:
+          lerpDouble(a.horizontalInterval, b.horizontalInterval, t),
       getDrawingHorizontalLine: b.getDrawingHorizontalLine,
       checkToShowHorizontalLine: b.checkToShowHorizontalLine,
       drawVerticalLine: b.drawVerticalLine,
@@ -521,16 +526,24 @@ class FlLine with EquatableMixin {
   /// followed by blank spaces 10 pixels long.
   final List<int> dashArray;
 
+  /// Drops a shadow behind the bar line.
+  final Shadow shadow;
+
   /// Renders a line, color it by [color],
   /// thickness is defined by [strokeWidth],
   /// and if you want to have dashed line, you should fill [dashArray],
   /// it is a circular array of dash offsets and lengths.
   /// For example, the array `[5, 10]` would result in dashes 5 pixels long
   /// followed by blank spaces 10 pixels long.
-  FlLine({Color color, double strokeWidth, List<int> dashArray})
-      : color = color ?? Colors.black,
+  FlLine({
+    Color color,
+    double strokeWidth,
+    List<int> dashArray,
+    Shadow shadow,
+  })  : color = color ?? Colors.black,
         strokeWidth = strokeWidth ?? 2,
-        dashArray = dashArray;
+        dashArray = dashArray,
+        shadow = shadow ?? Shadow(color: Colors.black.withAlpha(64), blurRadius: 4.0, offset: const Offset(0.0, 4.0));
 
   /// Lerps a [FlLine] based on [t] value, check [Tween.lerp].
   static FlLine lerp(FlLine a, FlLine b, double t) {
@@ -538,6 +551,7 @@ class FlLine with EquatableMixin {
       color: Color.lerp(a.color, b.color, t),
       strokeWidth: lerpDouble(a.strokeWidth, b.strokeWidth, t),
       dashArray: lerpIntList(a.dashArray, b.dashArray, t),
+      shadow: Shadow.lerp(a.shadow, b.shadow, t),
     );
   }
 
@@ -547,6 +561,7 @@ class FlLine with EquatableMixin {
         color,
         strokeWidth,
         dashArray,
+        shadow,
       ];
 }
 
@@ -593,7 +608,8 @@ class RangeAnnotations with EquatableMixin {
         verticalRangeAnnotations = verticalRangeAnnotations ?? const [];
 
   /// Lerps a [RangeAnnotations] based on [t] value, check [Tween.lerp].
-  static RangeAnnotations lerp(RangeAnnotations a, RangeAnnotations b, double t) {
+  static RangeAnnotations lerp(
+      RangeAnnotations a, RangeAnnotations b, double t) {
     return RangeAnnotations(
       horizontalRangeAnnotations: lerpHorizontalRangeAnnotationList(
           a.horizontalRangeAnnotations, b.horizontalRangeAnnotations, t),
