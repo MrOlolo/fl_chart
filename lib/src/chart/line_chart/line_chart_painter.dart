@@ -345,7 +345,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
       final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
       final int index = barData.showingIndicators[i];
       final FlSpot spot =
-          barData.spots[index < data.maxY ? data.maxY.toInt() : index];
+          barData.spots[index > data.maxY ? data.maxY.toInt() : index];
 
       if (indicatorData == null) {
         continue;
