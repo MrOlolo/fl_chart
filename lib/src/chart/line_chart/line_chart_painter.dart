@@ -276,7 +276,6 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
     }
   }
 
-
   void _drawTouchedSpotsDots(
       Canvas canvas, Size viewSize, LineChartBarData barData) {
     final Size chartViewSize = getChartUsableDrawSize(viewSize);
@@ -347,7 +346,6 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
       final int index = barData.showingIndicators[i];
       final FlSpot spot = barData.spots[index];
 
-
       if (indicatorData == null) {
         continue;
       }
@@ -370,35 +368,38 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
       }
 
       /// For drawing the indicator line
-      final bottom =
-          Offset(touchedSpot.dx, getTopOffsetDrawSize() + chartViewSize.height + data.titlesData.bottomTitles.margin);
+      final bottom = Offset(
+          touchedSpot.dx,
+          getTopOffsetDrawSize() +
+              chartViewSize.height +
+              data.titlesData.bottomTitles.margin);
 
       final top =
           Offset(getPixelX(spot.x, chartViewSize), getTopOffsetDrawSize());
 
-      double minHeight = getTopOffsetDrawSize() + chartViewSize.height + data.titlesData.bottomTitles.margin;
-
-      for (var item in data.lineBarsData) {
-        if (getPixelY(item.spots.firstWhere((element) => element.x == spot.x).y, chartViewSize) < minHeight) {
-          minHeight = getPixelY(item.spots.firstWhere((element) => element.x == spot.x).y, chartViewSize);
-        }
-      }
+//      double minHeight = getTopOffsetDrawSize() + chartViewSize.height + data.titlesData.bottomTitles.margin;
+//
+//      for (var item in data.lineBarsData) {
+//        if (getPixelY(item.spots.firstWhere((element) => element.x == spot.x).y, chartViewSize) < minHeight) {
+//          minHeight = getPixelY(item.spots.firstWhere((element) => element.x == spot.x).y, chartViewSize);
+//        }
+//      }
+//
+//      /// Draw to top or to the touchedSpot
+//      final Offset lineStart = touchedSpot.dy <= minHeight
+//          ? bottom
+//          : Offset(touchedSpot.dx,minHeight) ;
 
       /// Draw to top or to the touchedSpot
-      final Offset lineStart = touchedSpot.dy <= minHeight
-          ? bottom
-          : Offset(touchedSpot.dx,minHeight) ;
-
-      /// Draw to top or to the touchedSpot
-      final Offset lineEnd = data.lineTouchData.fullHeightTouchLine
-          ? top
-          : touchedSpot;
+      final Offset lineEnd =
+          data.lineTouchData.fullHeightTouchLine ? top : touchedSpot;
 
       if (lineEnd.dy > maxHeight.dy) {
         maxHeight = lineEnd;
       }
 
-      _drawLineWithShadow(indicatorData, canvas, lineStart, lineEnd, barData);
+      _drawLineWithShadow(
+          indicatorData, canvas, bottom, lineEnd, barData, false);
     }
   }
 
@@ -460,17 +461,21 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
           ? right
           : touchedSpot + Offset(dotHeight / 2, 0);
 
-
-      _drawLineWithShadow(indicatorData, canvas, left, lineEnd, barData);
+      _drawLineWithShadow(indicatorData, canvas, left, lineEnd, barData, true);
     }
   }
 
-  void _drawLineWithShadow(TouchedSpotIndicatorData indicatorData,
-      Canvas canvas, Offset bottom, Offset lineEnd, LineChartBarData barData) {
-
+  void _drawLineWithShadow(
+      TouchedSpotIndicatorData indicatorData,
+      Canvas canvas,
+      Offset bottom,
+      Offset lineEnd,
+      LineChartBarData barData,
+      bool horizontal) {
     if (indicatorData.indicatorBelowLine.shadow != null) {
       _touchLinePaint.color = indicatorData.indicatorBelowLine.shadow.color;
-      _touchLinePaint.strokeWidth = indicatorData.indicatorBelowLine.strokeWidth;
+      _touchLinePaint.strokeWidth =
+          indicatorData.indicatorBelowLine.strokeWidth;
       _touchLinePaint.maskFilter = MaskFilter.blur(
           BlurStyle.normal,
           convertRadiusToSigma(
@@ -484,7 +489,16 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
           indicatorData.indicatorBelowLine.dashArray);
     }
 
-    _touchLinePaint.color = barData.colors.first == const Color(0xFF6A6B6B) ? const Color.fromARGB(51, 255, 255, 255) : indicatorData.indicatorBelowLine.color;
+    if (horizontal) {
+      _touchLinePaint.color = barData.colors.first == const Color(0xFF6A6B6B)
+          ? const Color.fromARGB(51, 255, 255, 255)
+          : indicatorData.indicatorBelowLine.color;
+    } else {
+      _touchLinePaint.color = Color.alphaBlend(
+          indicatorData.indicatorBelowLine.color,
+          Color.alphaBlend(const Color(0xFF787878).withOpacity(0.2),
+              const Color(0xFF252F2E)));
+    }
     _touchLinePaint.strokeWidth = indicatorData.indicatorBelowLine.strokeWidth;
     _touchLinePaint.maskFilter = null;
 

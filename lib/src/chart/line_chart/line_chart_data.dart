@@ -35,6 +35,10 @@ class LineChartData extends AxisChartData with EquatableMixin {
   /// just put line indicator number and spots indices you want to show it on top of them.
   final List<ShowingTooltipIndicators> showingTooltipIndicators;
 
+  final bool alwaysShowTouch;
+
+  final bool showMaxValue;
+
   /// [LineChart] draws some lines in various shapes and overlaps them.
   /// lines are defined in [lineBarsData], sometimes you need to fill space between two bars
   /// with a color or gradient, you can use [betweenBarsData] to achieve that.
@@ -79,12 +83,16 @@ class LineChartData extends AxisChartData with EquatableMixin {
     double maxY,
     FlClipData clipData,
     Color backgroundColor,
+    bool alwaysShowTouch,
+    bool showMaxValue,
   })  : lineBarsData = lineBarsData ?? const [],
         betweenBarsData = betweenBarsData ?? const [],
         titlesData = titlesData ?? FlTitlesData(),
         extraLinesData = extraLinesData ?? ExtraLinesData(),
         lineTouchData = lineTouchData ?? LineTouchData(),
         showingTooltipIndicators = showingTooltipIndicators ?? const [],
+        alwaysShowTouch = alwaysShowTouch ?? false,
+        showMaxValue = showMaxValue ?? false,
         super(
           gridData: gridData ?? FlGridData(),
           touchData: lineTouchData ?? LineTouchData(),
@@ -199,6 +207,8 @@ class LineChartData extends AxisChartData with EquatableMixin {
     double maxY,
     FlClipData clipData,
     Color backgroundColor,
+    bool alwaysShowTouch,
+    bool showMaxValue,
   }) {
     return LineChartData(
       lineBarsData: lineBarsData ?? this.lineBarsData,
@@ -218,6 +228,8 @@ class LineChartData extends AxisChartData with EquatableMixin {
       maxY: maxY ?? this.maxY,
       clipData: clipData ?? this.clipData,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      alwaysShowTouch: alwaysShowTouch ?? this.alwaysShowTouch,
+      showMaxValue: showMaxValue ?? this.showMaxValue,
     );
   }
 
@@ -240,6 +252,8 @@ class LineChartData extends AxisChartData with EquatableMixin {
         maxY,
         clipData,
         backgroundColor,
+        alwaysShowTouch,
+        showMaxValue,
       ];
 }
 

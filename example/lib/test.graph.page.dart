@@ -39,7 +39,7 @@ class TestGraphState extends State<TestGraph> {
 
   double minSum = 0;
   double maxSum = 150000;
-  int dayNum = 12;
+  int dayNum = 150;
   double gridNum = 0;
   Random random = new Random();
 
@@ -111,6 +111,8 @@ class TestGraphState extends State<TestGraph> {
 
   LineChartData sampleData1() {
     return LineChartData(
+      alwaysShowTouch: true,
+      showMaxValue: true,
       lineTouchData: LineTouchData(
         getTouchedSpotIndicator: (barData, spotIndexes) => List.filled(
             spotIndexes.length,
@@ -285,13 +287,13 @@ class TestGraphState extends State<TestGraph> {
     final LineChartBarData lineChartBarData1 = LineChartBarData(
       spots: spotsBarFirst,
 //      spots: [
-//        FlSpot(1, 5234),
-//        FlSpot(3, 9124),
-//        FlSpot(5, 14250),
-//        FlSpot(7, 25215),
-//        FlSpot(10, 30510),
-//        FlSpot(12, 34500),
-//        FlSpot(13, 45001),
+//        FlSpot(1, 15234),
+//        FlSpot(3, 19124),
+//        FlSpot(5, 24250),
+//        FlSpot(7, 35215),
+//        FlSpot(10, 40510),
+//        FlSpot(12, 54500),
+//        FlSpot(13, 65001),
 //      ],
 //      shadow: Shadow(color: Colors.white, blurRadius: 10.0),
 
@@ -313,7 +315,7 @@ class TestGraphState extends State<TestGraph> {
 //        FlSpot(3, 5600),
 //        FlSpot(5, 12300),
 //        FlSpot(7, 20152),
-//        FlSpot(10, 24051),
+//        FlSpot(9, 24051),
 //        FlSpot(12, 34000),
 //        FlSpot(13, 41241),
 //      ],
@@ -332,8 +334,8 @@ class TestGraphState extends State<TestGraph> {
     );
 
     return [
-      lineChartBarData2,
       lineChartBarData1,
+//      lineChartBarData2,
     ];
   }
 }
