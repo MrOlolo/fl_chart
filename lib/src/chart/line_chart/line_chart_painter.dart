@@ -296,7 +296,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
       final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
       final int index = barData.showingIndicators[i];
       final FlSpot spot = barData.spots[
-          index > barData.spots.length ? barData.spots.length - 1 : index];
+          index >= barData.spots.length ? barData.spots.length - 1 : index];
 //      final FlSpot spot =
 //      barData.spots[index > data.maxX ? data.maxX.toInt() : index];
 
@@ -350,7 +350,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
       final int index = barData.showingIndicators[i];
       final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
       final FlSpot spot = barData.spots[
-          index > barData.spots.length ? barData.spots.length - 1 : index];
+          index >= barData.spots.length ? barData.spots.length - 1 : index];
 
       if (indicatorData == null) {
         continue;
@@ -431,7 +431,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
       final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
       final int index = barData.showingIndicators[i];
       final FlSpot spot = barData.spots[
-          index > barData.spots.length ? barData.spots.length - 1 : index];
+          index >= barData.spots.length ? barData.spots.length - 1 : index];
 //      final FlSpot spot =
 //      barData.spots[index > data.maxX ? data.maxX.toInt() : index];
 
