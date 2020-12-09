@@ -295,8 +295,10 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
     for (int i = 0; i < barData.showingIndicators.length; i++) {
       final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
       final int index = barData.showingIndicators[i];
-      final FlSpot spot =
-      barData.spots[index > data.maxX ? data.maxX.toInt() : index];
+      final FlSpot spot = barData.spots[
+          index > barData.spots.length ? barData.spots.length - 1 : index];
+//      final FlSpot spot =
+//      barData.spots[index > data.maxX ? data.maxX.toInt() : index];
 
       if (indicatorData == null) {
         continue;
@@ -319,7 +321,9 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
 
       /// Draw the indicator dot
       if (showingDots) {
-        drawer.draw(canvas, spot, touchedSpot);
+        if (index < barData.spots.length) {
+          drawer.draw(canvas, spot, touchedSpot);
+        }
       }
     }
   }
@@ -343,10 +347,10 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
     }
 
     for (int i = 0; i < barData.showingIndicators.length; i++) {
-      final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
       final int index = barData.showingIndicators[i];
-      final FlSpot spot =
-      barData.spots[index > data.maxX ? data.maxX.toInt() : index];
+      final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
+      final FlSpot spot = barData.spots[
+          index > barData.spots.length ? barData.spots.length - 1 : index];
 
       if (indicatorData == null) {
         continue;
@@ -400,8 +404,10 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
         maxHeight = lineEnd;
       }
 
-      _drawLineWithShadow(
-          indicatorData, canvas, bottom, lineEnd, barData, false);
+      if (index < barData.spots.length) {
+        _drawLineWithShadow(
+            indicatorData, canvas, bottom, lineEnd, barData, false);
+      }
     }
   }
 
@@ -424,8 +430,10 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
     for (int i = 0; i < barData.showingIndicators.length; i++) {
       final TouchedSpotIndicatorData indicatorData = indicatorsData[i];
       final int index = barData.showingIndicators[i];
-      final FlSpot spot =
-      barData.spots[index > data.maxX ? data.maxX.toInt() : index];
+      final FlSpot spot = barData.spots[
+          index > barData.spots.length ? barData.spots.length - 1 : index];
+//      final FlSpot spot =
+//      barData.spots[index > data.maxX ? data.maxX.toInt() : index];
 
       if (indicatorData == null) {
         continue;
@@ -464,7 +472,10 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
           ? right
           : touchedSpot + Offset(dotHeight / 2, 0);
 
-      _drawLineWithShadow(indicatorData, canvas, left, lineEnd, barData, true);
+      if (index < barData.spots.length) {
+        _drawLineWithShadow(
+            indicatorData, canvas, left, lineEnd, barData, true);
+      }
     }
   }
 
@@ -492,15 +503,17 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
           indicatorData.indicatorBelowLine.dashArray);
     }
 
-    if (horizontal) {
-      _touchLinePaint.color = barData.colors.first == const Color(0xFF6A6B6B)
+    if (horizontal ) {
+      _touchLinePaint.color = barData.colors.first == const Color(0xFF6A6B6B) && (data.lineBarsData.length > 1)
           ? const Color.fromARGB(51, 255, 255, 255)
           : indicatorData.indicatorBelowLine.color;
     } else {
-      _touchLinePaint.color = Color.alphaBlend(
-          indicatorData.indicatorBelowLine.color,
-          Color.alphaBlend(const Color(0xFF787878).withOpacity(0.2),
-              const Color(0xFF252F2E)));
+      _touchLinePaint.color =
+          indicatorData.indicatorBelowLine.color;
+//      _touchLinePaint.color = Color.alphaBlend(
+//          indicatorData.indicatorBelowLine.color,
+//          Color.alphaBlend(const Color(0xFF787878).withOpacity(0.2),
+//              const Color(0xFF252F2E)));
     }
     _touchLinePaint.strokeWidth = indicatorData.indicatorBelowLine.strokeWidth;
     _touchLinePaint.maskFilter = null;

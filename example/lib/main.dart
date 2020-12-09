@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: SafeArea(
 //        child: LineChartPage(),
-        child: TestGraph(),
+        child: StockGraph(),
 //        child: PageView(
 //          children: <Widget>[
 //            LineChartPage(),
