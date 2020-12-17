@@ -1052,6 +1052,45 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
     final leftTitles = targetData.titlesData.leftTitles;
     final leftInterval = leftTitles.interval ??
         getEfficientInterval(viewSize.height, data.verticalDiff);
+//    if (leftTitles.showTitles) {
+//      double verticalSeek = data.minY;
+//      while (verticalSeek <= data.maxY) {
+//        if (leftTitles.checkToShowTitle(
+//            data.minY, data.maxY, leftTitles, leftInterval, verticalSeek)) {
+//          double x = 0 + getLeftOffsetDrawSize();
+//          double y = getPixelY(verticalSeek, viewSize);
+//
+//          final String text = leftTitles.getTitles(verticalSeek);
+//
+//          final TextSpan span = TextSpan(
+//              style: leftTitles.getTextStyles(verticalSeek), text: text);
+//          final TextPainter tp = TextPainter(
+//              text: span,
+//              textAlign: TextAlign.center,
+//              textDirection: TextDirection.ltr,
+//              textScaleFactor: textScale);
+//          tp.layout(maxWidth: getExtraNeededHorizontalSpace());
+//          x -= tp.width + leftTitles.margin;
+//          y -= tp.height / 2;
+//          canvas.save();
+//          canvas.translate(x + tp.width / 2, y + tp.height / 2);
+//          canvas.rotate(radians(leftTitles.rotateAngle));
+//          canvas.translate(-(x + tp.width / 2), -(y + tp.height / 2));
+//          y -= translateRotatedPosition(tp.width, leftTitles.rotateAngle);
+//          tp.paint(canvas, Offset(x, y));
+//          canvas.restore();
+//        }
+//        if (data.maxY - verticalSeek < leftInterval &&
+//            data.maxY != verticalSeek) {
+//          verticalSeek = data.maxY;
+//        } else {
+//          verticalSeek += leftInterval;
+//        }
+//      }
+//    }
+
+
+    ///new left titles style
     if (leftTitles.showTitles) {
       double verticalSeek = data.minY;
       while (verticalSeek <= data.maxY) {
@@ -1069,11 +1108,11 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
               textAlign: TextAlign.center,
               textDirection: TextDirection.ltr,
               textScaleFactor: textScale);
-          tp.layout(maxWidth: getExtraNeededHorizontalSpace());
+          tp.layout(maxWidth: 100);
           x -= tp.width + leftTitles.margin;
           y -= tp.height / 2;
           canvas.save();
-          canvas.translate(x + tp.width / 2, y + tp.height / 2);
+          canvas.translate(11 + tp.width / 2, y + tp.height / 2);
           canvas.rotate(radians(leftTitles.rotateAngle));
           canvas.translate(-(x + tp.width / 2), -(y + tp.height / 2));
           y -= translateRotatedPosition(tp.width, leftTitles.rotateAngle);
