@@ -1555,10 +1555,12 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
         continue;
       }
 
-      final TextSpan span = TextSpan(
-          style: tooltipItem.textStyle,
-          text: _getDataString(tooltipData.firstDate
-              .add(Duration(days: toolTipSpot.x.toInt()))));
+      final TextSpan span =
+      TextSpan(style: tooltipItem.textStyle, text: tooltipItem.textVertical);
+//      final TextSpan span = TextSpan(
+//          style: tooltipItem.textStyle,
+//          text: _getDataString(tooltipData.firstDate
+//              .add(Duration(days: toolTipSpot.x.toInt()))));
       final TextPainter tp = TextPainter(
           text: span,
           textAlign: TextAlign.center,
@@ -1670,23 +1672,23 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
     }
   }
 
-  String _getDataString(DateTime date) {
-    final List<String> monthList = [
-      'января',
-      'февраля',
-      'марта',
-      'апреля',
-      'мая',
-      'июня',
-      'июля',
-      'августа',
-      'сентября',
-      'октября',
-      'ноября',
-      'декабря',
-    ];
-    return '${date.day} ${monthList[date.month - 1]}';
-  }
+//  String _getDataString(DateTime date) {
+//    final List<String> monthList = [
+//      'января',
+//      'февраля',
+//      'марта',
+//      'апреля',
+//      'мая',
+//      'июня',
+//      'июля',
+//      'августа',
+//      'сентября',
+//      'октября',
+//      'ноября',
+//      'декабря',
+//    ];
+//    return '${date.day} ${monthList[date.month - 1]}';
+//  }
 
   void _drawTouchTooltip(
       Canvas canvas,

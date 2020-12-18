@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'line_chart/line_chart_page.dart';
 
-import 'test2.graph.page.dart';
+import 'test.graph.page.dart';
 
 
 
@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: SafeArea(
 //        child: LineChartPage(),
-        child: CapitalGraph(),
+        child: StockGraph(),
 //        child: PageView(
 //          children: <Widget>[
 //            LineChartPage(),

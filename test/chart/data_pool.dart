@@ -898,14 +898,14 @@ final TouchedSpotIndicatorData touchedSpotIndicatorData6 = TouchedSpotIndicatorD
   FlDotData(getDotPainter: getDotDrawerTouched6, checkToShowDot: checkToShowDot, show: true),
 );
 
-final LineTooltipItem lineTooltipItem1 = LineTooltipItem('', const TextStyle(color: Colors.green));
+final LineTooltipItem lineTooltipItem1 = LineTooltipItem('','', const TextStyle(color: Colors.green));
 final LineTooltipItem lineTooltipItem1Clone =
-    LineTooltipItem('', const TextStyle(color: Colors.green));
+    LineTooltipItem('','', const TextStyle(color: Colors.green));
 
 final LineTooltipItem lineTooltipItem2 =
-    LineTooltipItem('ss', const TextStyle(color: Colors.green));
-final LineTooltipItem lineTooltipItem3 = LineTooltipItem('', const TextStyle(color: Colors.blue));
-final LineTooltipItem lineTooltipItem4 = LineTooltipItem('', null);
+    LineTooltipItem('ss','', const TextStyle(color: Colors.green));
+final LineTooltipItem lineTooltipItem3 = LineTooltipItem('', '',const TextStyle(color: Colors.blue));
+final LineTooltipItem lineTooltipItem4 = LineTooltipItem('', '',null);
 
 final Function(List<LineBarSpot> touchedSpots) lineChartGetTooltipItems = (list) {
   return list.map((s) => lineTooltipItem1).toList();
