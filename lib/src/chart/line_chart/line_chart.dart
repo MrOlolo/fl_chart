@@ -31,6 +31,8 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   LineChartDataTween _lineChartDataTween;
 
   TouchHandler _touchHandler;
+  
+  var needClear = false;
 
   final GlobalKey _chartKey = GlobalKey();
 
