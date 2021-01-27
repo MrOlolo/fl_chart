@@ -165,7 +165,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
           lineChartData.lineBarsData.map((barData) => LineBarSpot(
               barData,
               lineChartData.lineBarsData.indexOf(barData),
-              barData.spots.first)).toList()));
+              barData.spots.last)).toList()));
     }
 
     return lineChartData.copyWith(
@@ -174,8 +174,8 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         final index = lineChartData.lineBarsData.indexOf(barData);
         return barData.copyWith(
           showingIndicators: _showingTouchedIndicators[index] ??
-//              [lineChartData.lineBarsData[index].spots.length - 1],
-          [0],
+             [lineChartData.lineBarsData[index].spots.length - 1],
+          // [0],
         );
       }).toList(),
     );
