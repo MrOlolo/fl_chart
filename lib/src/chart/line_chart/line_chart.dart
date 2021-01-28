@@ -267,16 +267,23 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
   @override
   void forEachTween(visitor) {
-    var spots = _lineChartDataTween?.end?.lineBarsData?.first?.spots;
+    var barData = _lineChartDataTween?.end?.lineBarsData?.first;
+    var spots = barData?.spots;
     if (spots != null && spots.isNotEmpty) {
       final LineChartData showingData = _getData();
 
-      final LineTouchData touchData = showingData.lineTouchData;
       if (spots?.first != showingData.lineBarsData.first.spots.first) {
         needClear = true;
       } else {
         var needUpdate = spots.every((element) =>
         !showingData.lineBarsData.first.spots.contains(element));
+        if (needUpdate == false) {
+          if (_showingTouchedIndicators.isEmpty ||
+              _showingTouchedIndicators.isNotEmpty &&
+                  _showingTouchedIndicators[0].first == spots.length - 1) {
+            needUpdate = true;
+          }
+        }
         if (needUpdate) {
           needClear = true;
         }
@@ -285,7 +292,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     _lineChartDataTween = visitor(
       _lineChartDataTween,
       _getData(),
-      (dynamic value) => LineChartDataTween(begin: value),
+          (dynamic value) => LineChartDataTween(begin: value),
     );
   }
 }
