@@ -42,18 +42,21 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
   @override
   Widget build(BuildContext context) {
-    // print('kek1');
     final LineChartData showingData = _getData();
 
     final LineTouchData touchData = showingData.lineTouchData;
     if (needClear) {
-      Future.delayed(Duration(milliseconds: 10), () {
-        setState(() {
-          _showingTouchedTooltips?.clear();
-          _showingTouchedIndicators?.clear();
-        });
-        needClear = false;
-      });
+      needClear = false;
+
+      _showingTouchedTooltips?.clear();
+      _showingTouchedIndicators?.clear();
+      _showingTouchedTooltips.add(ShowingTooltipIndicators(
+          0,
+          showingData.lineBarsData.map((barData) =>
+              LineBarSpot(
+                  barData,
+                  showingData.lineBarsData.indexOf(barData),
+                  barData.spots.last)).toList()));
     }
 
     return GestureDetector(
@@ -269,26 +272,16 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
       final LineChartData showingData = _getData();
 
       final LineTouchData touchData = showingData.lineTouchData;
-      // print('spots?.first');
-      // print(spots?.first.x);
-      // print(spots?.first.y);
-      // print('showingData.lineBarsData.first.spots.first');
-      // print(showingData.lineBarsData.first.spots.first.x);
-      // print(showingData.lineBarsData.first.spots.first.y);
       if (spots?.first != showingData.lineBarsData.first.spots.first) {
         needClear = true;
       } else {
         var needUpdate = spots.every((element) =>
         !showingData.lineBarsData.first.spots.contains(element));
-        // print('needUpdate');
-        // print(needUpdate);
         if (needUpdate) {
           needClear = true;
         }
       }
     }
-    // print('kek2');
-    // print(needClear);
     _lineChartDataTween = visitor(
       _lineChartDataTween,
       _getData(),
