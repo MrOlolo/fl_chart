@@ -12,12 +12,14 @@ class LineChart extends ImplicitlyAnimatedWidget {
   /// Determines how the [LineChart] should be look like.
   final LineChartData data;
 
+  final bool resetTouchIndicatorOnTapUp;
+
   /// [data] determines how the [LineChart] should be look like,
   /// when you make any change in the [LineChartData], it updates
   /// new values with animation, and duration is [swapAnimationDuration].
-  const LineChart(
-    this.data, {
+  const LineChart(this.data, {
     Duration swapAnimationDuration = const Duration(milliseconds: 150),
+    this.resetTouchIndicatorOnTapUp = false,
   }) : super(duration: swapAnimationDuration);
 
   /// Creates a [_LineChartState]
@@ -31,7 +33,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   LineChartDataTween _lineChartDataTween;
 
   TouchHandler _touchHandler;
-  
+
   var needClear = false;
 
   final GlobalKey _chartKey = GlobalKey();
@@ -65,6 +67,8 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         if (chartSize == null) {
           return;
         }
+        if (widget.resetTouchIndicatorOnTapUp == true)
+          needClear = false;
 
         final LineTouchResponse response = _touchHandler?.handleTouch(
             FlLongPressStart(d.localPosition), chartSize);
@@ -77,6 +81,12 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         if (chartSize == null) {
           return;
         }
+        if (widget.resetTouchIndicatorOnTapUp == true) {
+          setState(() {
+            needClear = true;
+          });
+        }
+
 
         final LineTouchResponse response = _touchHandler?.handleTouch(
             FlLongPressEnd(d.localPosition), chartSize);
@@ -102,6 +112,14 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
           return;
         }
 
+        if (widget.resetTouchIndicatorOnTapUp == true) {
+          needClear = true;
+          Future.delayed(Duration(milliseconds: 50), () =>
+              setState(() {
+
+              }));
+        }
+
         final LineTouchResponse response = _touchHandler?.handleTouch(
             FlPanEnd(Offset.zero, const Velocity(pixelsPerSecond: Offset.zero)),
             chartSize);
@@ -113,6 +131,11 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         final Size chartSize = _getChartSize();
         if (chartSize == null) {
           return;
+        }
+        if (widget.resetTouchIndicatorOnTapUp == true) {
+          setState(() {
+            needClear = true;
+          });
         }
 
         final LineTouchResponse response = _touchHandler?.handleTouch(
@@ -147,14 +170,18 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
       },
       child: CustomPaint(
         key: _chartKey,
-        size: getDefaultSize(MediaQuery.of(context).size),
+        size: getDefaultSize(MediaQuery
+            .of(context)
+            .size),
         painter: LineChartPainter(
             _withTouchedIndicators(_lineChartDataTween.evaluate(animation)),
             _withTouchedIndicators(showingData), (touchHandler) {
           setState(() {
             _touchHandler = touchHandler;
           });
-        }, textScale: MediaQuery.of(context).textScaleFactor),
+        }, textScale: MediaQuery
+            .of(context)
+            .textScaleFactor),
       ),
     );
   }
@@ -178,10 +205,11 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     if (_showingTouchedTooltips.isEmpty && widget.data.alwaysShowTouch) {
       _showingTouchedTooltips.add(ShowingTooltipIndicators(
           0,
-          lineChartData.lineBarsData.map((barData) => LineBarSpot(
-              barData,
-              lineChartData.lineBarsData.indexOf(barData),
-              barData.spots.last)).toList()));
+          lineChartData.lineBarsData.map((barData) =>
+              LineBarSpot(
+                  barData,
+                  lineChartData.lineBarsData.indexOf(barData),
+                  barData.spots.last)).toList()));
     }
 
     return lineChartData.copyWith(
@@ -190,7 +218,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         final index = lineChartData.lineBarsData.indexOf(barData);
         return barData.copyWith(
           showingIndicators: _showingTouchedIndicators[index] ??
-             [lineChartData.lineBarsData[index].spots.length - 1],
+              [lineChartData.lineBarsData[index].spots.length - 1],
           // [0],
         );
       }).toList(),
@@ -199,7 +227,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
   Size _getChartSize() {
     final RenderBox containerRenderBox =
-        _chartKey.currentContext?.findRenderObject();
+    _chartKey.currentContext?.findRenderObject();
     if (containerRenderBox != null && containerRenderBox.hasSize) {
       return containerRenderBox.size;
     }
