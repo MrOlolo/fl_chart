@@ -10,6 +10,9 @@ class LineChart extends ImplicitlyAnimatedWidget {
   /// Determines how the [LineChart] should be look like.
   final LineChartData data;
 
+  ///Determines the behavior of touch indicator
+  final bool resetTouchIndicatorOnTapUp;
+
   /// [data] determines how the [LineChart] should be look like,
   /// when you make any change in the [LineChartData], it updates
   /// new values with animation, and duration is [swapAnimationDuration].
@@ -19,6 +22,7 @@ class LineChart extends ImplicitlyAnimatedWidget {
     this.data, {
     Duration swapAnimationDuration = const Duration(milliseconds: 150),
     Curve swapAnimationCurve = Curves.linear,
+    this.resetTouchIndicatorOnTapUp = false,
   }) : super(duration: swapAnimationDuration, curve: swapAnimationCurve);
 
   /// Creates a [_LineChartState]
@@ -35,9 +39,24 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
   final Map<int, List<int>> _showingTouchedIndicators = {};
 
+  bool needClear = false;
+
   @override
   Widget build(BuildContext context) {
     final showingData = _getData();
+
+    if (needClear) {
+      needClear = false;
+
+      _showingTouchedTooltips.clear();
+      _showingTouchedIndicators.clear();
+      _showingTouchedTooltips.add(ShowingTooltipIndicators(
+          0,
+          showingData.lineBarsData
+              .map((barData) => LineBarSpot(
+                  barData, showingData.lineBarsData.indexOf(barData), barData.spots.last))
+              .toList()));
+    }
 
     /// Wr wrapped our chart with [GestureDetector], and onLongPressStart callback.
     /// because we wanted to lock the widget from being scrolled when user long presses on it.
@@ -57,12 +76,25 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
       return lineChartData;
     }
 
+    if (_showingTouchedTooltips.isEmpty && widget.data.alwaysShowTouchIndicator) {
+      _showingTouchedTooltips.add(ShowingTooltipIndicators(
+          0,
+          lineChartData.lineBarsData
+              .map((barData) => LineBarSpot(
+                  barData, lineChartData.lineBarsData.indexOf(barData), barData.spots.last))
+              .toList()));
+    }
+
     return lineChartData.copyWith(
       showingTooltipIndicators: _showingTouchedTooltips,
       lineBarsData: lineChartData.lineBarsData.map((barData) {
         final index = lineChartData.lineBarsData.indexOf(barData);
+        var defaultIndicators = <int>[];
+        if (lineChartData.alwaysShowTouchIndicator) {
+          defaultIndicators = [lineChartData.lineBarsData[index].spots.length - 1];
+        }
         return barData.copyWith(
-          showingIndicators: _showingTouchedIndicators[index] ?? [],
+          showingIndicators: _showingTouchedIndicators[index] ?? defaultIndicators,
         );
       }).toList(),
     );
@@ -87,28 +119,69 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     if (desiredTouch && touchResponse.lineBarSpots != null) {
       setState(() {
         final sortedLineSpots = List.of(touchResponse.lineBarSpots!);
-        sortedLineSpots.sort((spot1, spot2) => spot2.y.compareTo(spot1.y));
 
-        _showingTouchedIndicators.clear();
+        if (widget.data.showMaxValueAtTheTop) {
+          sortedLineSpots.sort((spot1, spot2) => spot1.y.compareTo(spot2.y));
+        } else {
+          sortedLineSpots.sort((spot1, spot2) => spot2.y.compareTo(spot1.y));
+        }
+
+        if (!widget.data.alwaysShowTouchIndicator) {
+          _showingTouchedIndicators.clear();
+        }
+
         for (var i = 0; i < touchResponse.lineBarSpots!.length; i++) {
           final touchedBarSpot = touchResponse.lineBarSpots![i];
           final barPos = touchedBarSpot.barIndex;
           _showingTouchedIndicators[barPos] = [touchedBarSpot.spotIndex];
         }
 
-        _showingTouchedTooltips.clear();
-        _showingTouchedTooltips.add(ShowingTooltipIndicators(0, sortedLineSpots));
+        if (sortedLineSpots.isNotEmpty && widget.data.alwaysShowTouchIndicator) {
+          _showingTouchedTooltips.clear();
+          _showingTouchedTooltips.add(ShowingTooltipIndicators(0, sortedLineSpots));
+        }
+        // _showingTouchedTooltips.clear();
+        // _showingTouchedTooltips.add(ShowingTooltipIndicators(0, sortedLineSpots));
       });
     } else {
-      setState(() {
-        _showingTouchedTooltips.clear();
-        _showingTouchedIndicators.clear();
-      });
+      if (!widget.data.alwaysShowTouchIndicator) {
+        setState(() {
+          _showingTouchedTooltips.clear();
+          _showingTouchedIndicators.clear();
+        });
+      } else {
+        if (widget.resetTouchIndicatorOnTapUp == true) {
+          needClear = true;
+          Future.delayed(Duration(milliseconds: 50), () => setState(() {}));
+        }
+      }
     }
   }
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
+    var barData = _lineChartDataTween?.end?.lineBarsData.first;
+    var spots = barData?.spots;
+    if (spots != null && spots.isNotEmpty) {
+      final showingData = _getData();
+
+      if (spots.first != showingData.lineBarsData.first.spots.first) {
+        needClear = true;
+      } else {
+        var needUpdate =
+            spots.every((element) => !showingData.lineBarsData.first.spots.contains(element));
+        if (needUpdate == false) {
+          if (_showingTouchedIndicators.isEmpty ||
+              _showingTouchedIndicators.isNotEmpty &&
+                  _showingTouchedIndicators[0]!.first == spots.length - 1) {
+            needUpdate = true;
+          }
+        }
+        if (needUpdate) {
+          needClear = true;
+        }
+      }
+    }
     _lineChartDataTween = visitor(
       _lineChartDataTween,
       _getData(),

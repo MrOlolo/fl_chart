@@ -541,16 +541,22 @@ class FlLine with EquatableMixin {
   /// followed by blank spaces 10 pixels long.
   final List<int>? dashArray;
 
+  /// Drops a shadow behind the bar line.
+  final Shadow shadow;
+
   /// Renders a line, color it by [color],
   /// thickness is defined by [strokeWidth],
   /// and if you want to have dashed line, you should fill [dashArray],
   /// it is a circular array of dash offsets and lengths.
   /// For example, the array `[5, 10]` would result in dashes 5 pixels long
   /// followed by blank spaces 10 pixels long.
-  FlLine({Color? color, double? strokeWidth, List<int>? dashArray})
+  FlLine({Color? color, double? strokeWidth, List<int>? dashArray, Shadow? shadow})
       : color = color ?? Colors.black,
         strokeWidth = strokeWidth ?? 2,
-        dashArray = dashArray;
+        dashArray = dashArray,
+        shadow = shadow ??
+            Shadow(
+                color: Colors.black.withAlpha(64), blurRadius: 4.0, offset: const Offset(0.0, 4.0));
 
   /// Lerps a [FlLine] based on [t] value, check [Tween.lerp].
   static FlLine lerp(FlLine a, FlLine b, double t) {
@@ -558,6 +564,7 @@ class FlLine with EquatableMixin {
       color: Color.lerp(a.color, b.color, t),
       strokeWidth: lerpDouble(a.strokeWidth, b.strokeWidth, t),
       dashArray: lerpIntList(a.dashArray, b.dashArray, t),
+      shadow: Shadow.lerp(a.shadow, b.shadow, t),
     );
   }
 
@@ -567,6 +574,7 @@ class FlLine with EquatableMixin {
         color,
         strokeWidth,
         dashArray,
+        shadow,
       ];
 }
 

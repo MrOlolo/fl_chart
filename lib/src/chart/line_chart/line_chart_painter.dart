@@ -104,7 +104,17 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
         _drawExtraLines(canvasWrapper, holder);
       }
 
-      _drawTouchedSpotsIndicator(canvasWrapper, barData, holder);
+      if (data.lineTouchData.touchTooltipData.customTooltipLabels) {
+        if (holder.data.lineTouchData.touchTooltipData.customTooltipLabelsShowAtAxisX) {
+          _drawTouchedSpotsIndicatorCustom(canvasWrapper, barData, holder);
+        }
+        if (holder.data.lineTouchData.touchTooltipData.customTooltipLabelsShowAtAxisY) {
+          _drawTouchedSpotsHorizontalIndicator(canvasWrapper, barData, holder);
+        }
+        _drawTouchedSpotsDots(canvasWrapper, barData, holder);
+      } else {
+        _drawTouchedSpotsIndicator(canvasWrapper, barData, holder);
+      }
     }
 
     if (data.clipData.any) {
@@ -131,13 +141,34 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
       }
       tooltipSpots = ShowingTooltipIndicators(tooltipSpots.lineIndex, barSpots);
 
-      _drawTouchTooltip(
-        canvasWrapper,
-        data.lineTouchData.touchTooltipData,
-        topSpot,
-        tooltipSpots,
-        holder,
-      );
+      if (data.lineTouchData.touchTooltipData.customTooltipLabels) {
+        if (holder.data.lineTouchData.touchTooltipData.customTooltipLabelsShowAtAxisY) {
+          _drawCustomTouchTooltipAxisY(
+            canvasWrapper,
+            data.lineTouchData.touchTooltipData,
+            topSpot,
+            tooltipSpots,
+            holder,
+          );
+        }
+        if (holder.data.lineTouchData.touchTooltipData.customTooltipLabelsShowAtAxisX) {
+          _drawCustomTouchTooltipAxisX(
+            canvasWrapper,
+            data.lineTouchData.touchTooltipData,
+            topSpot,
+            tooltipSpots,
+            holder,
+          );
+        }
+      } else {
+        _drawTouchTooltip(
+          canvasWrapper,
+          data.lineTouchData.touchTooltipData,
+          topSpot,
+          tooltipSpots,
+          holder,
+        );
+      }
     }
   }
 
@@ -860,11 +891,13 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
               textAlign: TextAlign.center,
               textDirection: leftTitles.textDirection,
               textScaleFactor: holder.textScale);
-          tp.layout(maxWidth: getExtraNeededHorizontalSpace(holder));
+          // tp.layout(maxWidth: getExtraNeededHorizontalSpace(holder));
+          tp.layout(maxWidth: 100);
           x -= tp.width + leftTitles.margin;
           y -= tp.height / 2;
           canvasWrapper.save();
-          canvasWrapper.translate(x + tp.width / 2, y + tp.height / 2);
+          // canvasWrapper.translate(x + tp.width / 2, y + tp.height / 2);
+          canvasWrapper.translate(11 + tp.width / 2, y + tp.height / 2);
           canvasWrapper.rotate(radians(leftTitles.rotateAngle));
           canvasWrapper.translate(-(x + tp.width / 2), -(y + tp.height / 2));
           y -= translateRotatedPosition(tp.width, leftTitles.rotateAngle);
@@ -1437,5 +1470,550 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
     }
 
     return null;
+  }
+
+  void _drawTouchedSpotsIndicatorCustom(
+    CanvasWrapper canvasWrapper,
+    LineChartBarData barData,
+    PaintHolder<LineChartData> holder,
+  ) {
+    if (barData.showingIndicators.isEmpty) {
+      return;
+    }
+    final viewSize = canvasWrapper.size;
+    final chartViewSize = getChartUsableDrawSize(viewSize, holder);
+
+    final barXDelta = _getBarLineXLength(barData, viewSize, holder);
+
+    final data = holder.data;
+
+    // Todo technical debt, we can read the TouchedSpotIndicatorData directly,
+    // Todo instead of mapping indexes to TouchedSpotIndicatorData
+    final indicatorsData =
+        data.lineTouchData.getTouchedSpotIndicator(barData, barData.showingIndicators);
+
+    if (indicatorsData.length != barData.showingIndicators.length) {
+      throw Exception('indicatorsData and touchedSpotOffsets size should be same');
+    }
+
+    for (var i = 0; i < barData.showingIndicators.length; i++) {
+      final indicatorData = indicatorsData[i];
+      final index = barData.showingIndicators[i];
+      final spot = barData.spots[index >= barData.spots.length ? barData.spots.length - 1 : index];
+
+      if (indicatorData == null) {
+        continue;
+      }
+
+      final touchedSpot = Offset(
+          getPixelX(spot.x, chartViewSize, holder), getPixelY(spot.y, chartViewSize, holder));
+
+      /// For drawing the dot
+      final showingDots = indicatorData.touchedSpotDotData.show;
+      var dotHeight = 0.0;
+      late FlDotPainter dotPainter;
+
+      if (showingDots) {
+        final xPercentInLine = ((touchedSpot.dx - getLeftOffsetDrawSize(holder)) / barXDelta) * 100;
+        dotPainter =
+            indicatorData.touchedSpotDotData.getDotPainter(spot, xPercentInLine, barData, index);
+        dotHeight = dotPainter.getSize(spot).height;
+      }
+
+      /// For drawing the indicator line
+      final lineStartY =
+          min(data.maxY, max(data.minY, data.lineTouchData.getTouchLineStart(barData, index)));
+      final lineEndY =
+          min(data.maxY, max(data.minY, data.lineTouchData.getTouchLineEnd(barData, index)));
+      final lineStart = Offset(
+          touchedSpot.dx,
+          getPixelY(lineStartY, chartViewSize, holder) +
+              holder.data.titlesData.bottomTitles.margin);
+      var lineEnd = Offset(touchedSpot.dx, getPixelY(lineEndY, chartViewSize, holder));
+      print(lineStartY);
+      print('lineStart');
+
+      /// If line end is inside the dot, adjust it so that it doesn't overlap with the dot.
+      final dotMinY = touchedSpot.dy - dotHeight / 2;
+      final dotMaxY = touchedSpot.dy + dotHeight / 2;
+      if (lineEnd.dy > dotMinY && lineEnd.dy < dotMaxY) {
+        if (lineStart.dy < lineEnd.dy) {
+          lineEnd -= Offset(0, lineEnd.dy - dotMinY);
+        } else {
+          lineEnd += Offset(0, dotMaxY - lineEnd.dy);
+        }
+      }
+
+      // _touchLinePaint.color = indicatorData.indicatorBelowLine.color;
+      // _touchLinePaint.strokeWidth = indicatorData.indicatorBelowLine.strokeWidth;
+      // _touchLinePaint.transparentIfWidthIsZero();
+
+      // canvasWrapper.drawDashedLine(
+      //     lineStart, lineEnd, _touchLinePaint, indicatorData.indicatorBelowLine.dashArray);
+
+      /// Draw the indicator dot
+      // if (showingDots) {
+      //   canvasWrapper.drawDot(dotPainter, spot, touchedSpot);
+      // }
+      if (index < barData.spots.length) {
+        _drawLineWithShadow(
+            indicatorData, canvasWrapper, lineStart, lineEnd, barData, false, holder);
+      }
+    }
+  }
+
+  void _drawTouchedSpotsDots(
+    CanvasWrapper canvasWrapper,
+    LineChartBarData barData,
+    PaintHolder<LineChartData> holder,
+  ) {
+    if (barData.showingIndicators.isEmpty) {
+      return;
+    }
+    final viewSize = canvasWrapper.size;
+    final chartViewSize = getChartUsableDrawSize(viewSize, holder);
+
+    final barXDelta = _getBarLineXLength(barData, viewSize, holder);
+
+    final data = holder.data;
+
+    // Todo technical debt, we can read the TouchedSpotIndicatorData directly,
+    // Todo instead of mapping indexes to TouchedSpotIndicatorData
+    final indicatorsData =
+        data.lineTouchData.getTouchedSpotIndicator(barData, barData.showingIndicators);
+
+    if (indicatorsData.length != barData.showingIndicators.length) {
+      throw Exception('indicatorsData and touchedSpotOffsets size should be same');
+    }
+
+    for (var i = 0; i < barData.showingIndicators.length; i++) {
+      final indicatorData = indicatorsData[i];
+      final index = barData.showingIndicators[i];
+      final spot = barData.spots[index >= barData.spots.length ? barData.spots.length - 1 : index];
+
+      if (indicatorData == null) {
+        continue;
+      }
+
+      final touchedSpot = Offset(
+          getPixelX(spot.x, chartViewSize, holder), getPixelY(spot.y, chartViewSize, holder));
+
+      /// For drawing the dot
+      final showingDots = indicatorData.touchedSpotDotData.show;
+      late FlDotPainter dotPainter;
+
+      if (showingDots) {
+        final xPercentInLine = ((touchedSpot.dx - getLeftOffsetDrawSize(holder)) / barXDelta) * 100;
+        dotPainter =
+            indicatorData.touchedSpotDotData.getDotPainter(spot, xPercentInLine, barData, index);
+      }
+
+      /// Draw the indicator dot
+      if (showingDots) {
+        if (index < barData.spots.length) {
+          canvasWrapper.drawDot(dotPainter, spot, touchedSpot);
+        }
+      }
+    }
+  }
+
+  void _drawTouchedSpotsHorizontalIndicator(
+    CanvasWrapper canvasWrapper,
+    LineChartBarData barData,
+    PaintHolder<LineChartData> holder,
+  ) {
+    if (barData.showingIndicators.isEmpty) {
+      return;
+    }
+    final viewSize = canvasWrapper.size;
+    final chartViewSize = getChartUsableDrawSize(viewSize, holder);
+
+    final barXDelta = _getBarLineXLength(barData, viewSize, holder);
+
+    final data = holder.data;
+
+    // Todo technical debt, we can read the TouchedSpotIndicatorData directly,
+    // Todo instead of mapping indexes to TouchedSpotIndicatorData
+    final indicatorsData =
+        data.lineTouchData.getTouchedSpotIndicator(barData, barData.showingIndicators);
+
+    if (indicatorsData.length != barData.showingIndicators.length) {
+      throw Exception('indicatorsData and touchedSpotOffsets size should be same');
+    }
+
+    for (var i = 0; i < barData.showingIndicators.length; i++) {
+      final indicatorData = indicatorsData[i];
+      final index = barData.showingIndicators[i];
+      final spot = barData.spots[index >= barData.spots.length ? barData.spots.length - 1 : index];
+
+      if (indicatorData == null) {
+        continue;
+      }
+
+      final touchedSpot = Offset(
+          getPixelX(spot.x, chartViewSize, holder), getPixelY(spot.y, chartViewSize, holder));
+
+      /// For drawing the dot
+      final showingDots = indicatorData.touchedSpotDotData.show;
+      var dotHeight = 0.0;
+      late FlDotPainter dotPainter;
+
+      if (showingDots) {
+        final xPercentInLine = ((touchedSpot.dx - getLeftOffsetDrawSize(holder)) / barXDelta) * 100;
+        dotPainter =
+            indicatorData.touchedSpotDotData.getDotPainter(spot, xPercentInLine, barData, index);
+        dotHeight = dotPainter.getSize(spot).height;
+      }
+
+      /// For drawing the indicator line
+      final lineStartY =
+          min(data.maxX, max(data.minX, data.lineTouchData.getTouchLineStart(barData, index)));
+      final lineEndY =
+          min(data.maxY, max(data.minY, data.lineTouchData.getTouchLineEnd(barData, index)));
+      final lineStart = Offset(lineStartY, getPixelY(lineEndY, chartViewSize, holder));
+      var lineEnd = Offset(touchedSpot.dx, getPixelY(lineEndY, chartViewSize, holder));
+
+      /// If line end is inside the dot, adjust it so that it doesn't overlap with the dot.
+      final dotMinX = touchedSpot.dx - dotHeight / 2;
+      final dotMaxX = touchedSpot.dx + dotHeight / 2;
+      if (lineEnd.dx > dotMinX && lineEnd.dx < dotMaxX) {
+        if (lineStart.dy < lineEnd.dy) {
+          lineEnd -= Offset(lineEnd.dx - dotMinX, 0);
+        } else {
+          lineEnd += Offset(dotMaxX - lineEnd.dx, 0);
+        }
+      }
+
+      // _touchLinePaint.color = indicatorData.indicatorBelowLine.color;
+      // _touchLinePaint.strokeWidth = indicatorData.indicatorBelowLine.strokeWidth;
+      // _touchLinePaint.transparentIfWidthIsZero();
+
+      // canvasWrapper.drawDashedLine(
+      //     lineStart, lineEnd, _touchLinePaint, indicatorData.indicatorBelowLine.dashArray);
+
+      /// Draw the indicator dot
+      // if (showingDots) {
+      //   canvasWrapper.drawDot(dotPainter, spot, touchedSpot);
+      // }
+      if (index < barData.spots.length) {
+        _drawLineWithShadow(
+            indicatorData, canvasWrapper, lineStart, lineEnd, barData, true, holder);
+      }
+    }
+  }
+
+  void _drawLineWithShadow(
+      TouchedSpotIndicatorData indicatorData,
+      CanvasWrapper canvasWrapper,
+      Offset lineStart,
+      Offset lineEnd,
+      LineChartBarData barData,
+      bool horizontal,
+      PaintHolder<LineChartData> holder) {
+    _touchLinePaint.color = indicatorData.indicatorBelowLine.shadow.color;
+    _touchLinePaint.strokeWidth = indicatorData.indicatorBelowLine.strokeWidth;
+    _touchLinePaint.maskFilter = MaskFilter.blur(
+        BlurStyle.normal, convertRadiusToSigma(indicatorData.indicatorBelowLine.shadow.blurRadius));
+    canvasWrapper.drawDashedLine(
+        lineStart.translate(indicatorData.indicatorBelowLine.shadow.offset.dx,
+            indicatorData.indicatorBelowLine.shadow.offset.dy),
+        lineEnd.translate(indicatorData.indicatorBelowLine.shadow.offset.dx,
+            indicatorData.indicatorBelowLine.shadow.offset.dy),
+        _touchLinePaint,
+        indicatorData.indicatorBelowLine.dashArray);
+
+    if (horizontal) {
+      _touchLinePaint.color =
+          barData.colors.first == const Color(0xFF6A6B6B) && (holder.data.lineBarsData.length > 1)
+              ? const Color.fromARGB(51, 255, 255, 255)
+              : indicatorData.indicatorBelowLine.color;
+    } else {
+      _touchLinePaint.color = indicatorData.indicatorBelowLine.color;
+//      _touchLinePaint.color = Color.alphaBlend(
+//          indicatorData.indicatorBelowLine.color,
+//          Color.alphaBlend(const Color(0xFF787878).withOpacity(0.2),
+//              const Color(0xFF252F2E)));
+    }
+    _touchLinePaint.strokeWidth = indicatorData.indicatorBelowLine.strokeWidth;
+    _touchLinePaint.maskFilter = null;
+
+    canvasWrapper.drawDashedLine(
+        lineStart, lineEnd, _touchLinePaint, indicatorData.indicatorBelowLine.dashArray);
+  }
+
+  void _drawCustomTouchTooltipAxisY(
+      CanvasWrapper canvasWrapper,
+      LineTouchTooltipData tooltipData,
+      FlSpot showOnSpot,
+      ShowingTooltipIndicators showingTooltipSpots,
+      PaintHolder<LineChartData> holder) {
+    final viewSize = canvasWrapper.size;
+    final chartUsableSize = getChartUsableDrawSize(viewSize, holder);
+
+    /// creating TextPainters to calculate the width and height of the tooltip
+    final drawingTextPainters = <TextPainter>[];
+
+    final tooltipItems = tooltipData.getTooltipItems(showingTooltipSpots.showingSpots);
+    if (tooltipItems.length != showingTooltipSpots.showingSpots.length) {
+      throw Exception('tooltipItems and touchedSpots size should be same');
+    }
+
+    for (var i = 0; i < showingTooltipSpots.showingSpots.length; i++) {
+      final tooltipItem = tooltipItems[i];
+      if (tooltipItem == null) {
+        continue;
+      }
+      final toolTipSpot = showingTooltipSpots.showingSpots[i];
+
+      final span = TextSpan(
+        style: tooltipItem.textStyleAxisY,
+        text: tooltipItem.textAxisY,
+        children: tooltipItem.children,
+      );
+
+      final tp = TextPainter(
+          text: span,
+          textAlign: tooltipItem.textAlign,
+          textDirection: tooltipItem.textDirection,
+          textScaleFactor: holder.textScale);
+      tp.layout(maxWidth: tooltipData.maxContentWidth);
+      drawingTextPainters.add(tp);
+
+      /// biggerWidth
+      /// some texts maybe larger, then we should
+      /// draw the tooltip' width as wide as biggerWidth
+      ///
+      /// sumTextsHeight
+      /// sum up all Texts height, then we should
+      /// draw the tooltip's height as tall as sumTextsHeight
+      var biggerWidth = 0.0;
+      var sumTextsHeight = 0.0;
+      for (var tp in drawingTextPainters) {
+        if (tp.width > biggerWidth) {
+          biggerWidth = tp.width;
+        }
+        sumTextsHeight = tp.height;
+      }
+
+      /// if we have multiple bar lines,
+      /// there are more than one FlCandidate on touch area,
+      /// we should get the most top FlSpot Offset to draw the tooltip on top of it
+      final touchedSpot = Offset(
+        getPixelX(toolTipSpot.x, chartUsableSize, holder),
+        getPixelY(toolTipSpot.y, chartUsableSize, holder),
+      );
+
+      final tooltipWidth = biggerWidth + tooltipData.tooltipPadding.horizontal;
+      final tooltipHeight = sumTextsHeight + tooltipData.tooltipPadding.vertical;
+
+      /// draw the background rect with rounded radius
+      var rect = Rect.fromLTWH(
+        getLeftOffsetDrawSize(holder) - tooltipWidth,
+        touchedSpot.dy - (tooltipHeight / 2),
+        tooltipWidth,
+        tooltipHeight,
+      );
+
+      if (tooltipData.fitInsideHorizontally) {
+        if (rect.left < 0) {
+          final shiftAmount = 0 - rect.left;
+          rect = Rect.fromLTRB(
+            rect.left + shiftAmount,
+            rect.top,
+            rect.right + shiftAmount,
+            rect.bottom,
+          );
+        }
+
+        if (rect.right > viewSize.width) {
+          final shiftAmount = rect.right - viewSize.width;
+          rect = Rect.fromLTRB(
+            rect.left - shiftAmount,
+            rect.top,
+            rect.right - shiftAmount,
+            rect.bottom,
+          );
+        }
+      }
+
+      if (tooltipData.fitInsideVertically) {
+        if (rect.top < 0) {
+          final shiftAmount = 0 - rect.top;
+          rect = Rect.fromLTRB(
+            rect.left,
+            rect.top + shiftAmount,
+            rect.right,
+            rect.bottom + shiftAmount,
+          );
+        }
+
+        if (rect.bottom > viewSize.height) {
+          final shiftAmount = rect.bottom - viewSize.height;
+          rect = Rect.fromLTRB(
+            rect.left,
+            rect.top - shiftAmount,
+            rect.right,
+            rect.bottom - shiftAmount,
+          );
+        }
+      }
+
+      final radius = Radius.circular(tooltipData.tooltipRoundedRadius);
+      final roundedRect = RRect.fromRectAndCorners(rect,
+          topLeft: radius, topRight: radius, bottomLeft: radius, bottomRight: radius);
+      _bgTouchTooltipPaint.color = tooltipData.tooltipBgColor;
+      canvasWrapper.drawRRect(roundedRect, _bgTouchTooltipPaint);
+
+      /// draw the texts one by one in below of each other
+
+      final drawOffset = Offset(
+        rect.center.dx - (tp.width / 2),
+        rect.topCenter.dy + tooltipData.tooltipPadding.top,
+      );
+      canvasWrapper.drawText(tp, drawOffset);
+    }
+    if (drawingTextPainters.isEmpty) {
+      return;
+    }
+  }
+
+  void _drawCustomTouchTooltipAxisX(
+      CanvasWrapper canvasWrapper,
+      LineTouchTooltipData tooltipData,
+      FlSpot showOnSpot,
+      ShowingTooltipIndicators showingTooltipSpots,
+      PaintHolder<LineChartData> holder) {
+    final viewSize = canvasWrapper.size;
+    final chartUsableSize = getChartUsableDrawSize(viewSize, holder);
+
+    /// creating TextPainters to calculate the width and height of the tooltip
+    final drawingTextPainters = <TextPainter>[];
+
+    final tooltipItems = tooltipData.getTooltipItems(showingTooltipSpots.showingSpots);
+    if (tooltipItems.length != showingTooltipSpots.showingSpots.length) {
+      throw Exception('tooltipItems and touchedSpots size should be same');
+    }
+
+    for (var i = 0; i < showingTooltipSpots.showingSpots.length; i++) {
+      final tooltipItem = tooltipItems[i];
+      if (tooltipItem == null) {
+        continue;
+      }
+      final toolTipSpot = showingTooltipSpots.showingSpots[i];
+
+      final span = TextSpan(
+        style: tooltipItem.textStyleAxisX,
+        text: tooltipItem.textAxisX,
+        children: tooltipItem.children,
+      );
+
+      final tp = TextPainter(
+          text: span,
+          textAlign: tooltipItem.textAlign,
+          textDirection: tooltipItem.textDirection,
+          textScaleFactor: holder.textScale);
+      tp.layout(maxWidth: tooltipData.maxContentWidth);
+      drawingTextPainters.add(tp);
+
+      /// biggerWidth
+      /// some texts maybe larger, then we should
+      /// draw the tooltip' width as wide as biggerWidth
+      ///
+      /// sumTextsHeight
+      /// sum up all Texts height, then we should
+      /// draw the tooltip's height as tall as sumTextsHeight
+      var biggerWidth = 0.0;
+      var sumTextsHeight = 0.0;
+      for (var tp in drawingTextPainters) {
+        if (tp.width > biggerWidth) {
+          biggerWidth = tp.width;
+        }
+        sumTextsHeight = tp.height;
+      }
+
+      /// if we have multiple bar lines,
+      /// there are more than one FlCandidate on touch area,
+      /// we should get the most top FlSpot Offset to draw the tooltip on top of it
+      final touchedSpot = Offset(
+        getPixelX(toolTipSpot.x, chartUsableSize, holder),
+        getPixelY(toolTipSpot.y, chartUsableSize, holder),
+      );
+
+      final tooltipWidth = biggerWidth + tooltipData.tooltipPadding.horizontal;
+      final tooltipHeight = sumTextsHeight + tooltipData.tooltipPadding.vertical;
+
+      /// draw the background rect with rounded radius
+      var rect = Rect.fromLTWH(
+        touchedSpot.dx - (tooltipWidth / 2),
+        chartUsableSize.height +
+            holder.data.titlesData.bottomTitles.margin -
+            tooltipData.tooltipPadding.top -
+            1.0,
+        tooltipWidth,
+        tooltipHeight,
+      );
+
+      if (tooltipData.fitInsideHorizontally) {
+        if (rect.left < 0) {
+          final shiftAmount = 0 - rect.left;
+          rect = Rect.fromLTRB(
+            rect.left + shiftAmount,
+            rect.top,
+            rect.right + shiftAmount,
+            rect.bottom,
+          );
+        }
+
+        if (rect.right > viewSize.width + holder.data.axisTitleData.rightTitle.reservedSize) {
+          final shiftAmount =
+              rect.right - viewSize.width - holder.data.axisTitleData.rightTitle.reservedSize;
+          rect = Rect.fromLTRB(
+            rect.left - shiftAmount,
+            rect.top,
+            rect.right - shiftAmount,
+            rect.bottom,
+          );
+        }
+      }
+
+      if (tooltipData.fitInsideVertically) {
+        if (rect.top < 0) {
+          final shiftAmount = 0 - rect.top;
+          rect = Rect.fromLTRB(
+            rect.left,
+            rect.top + shiftAmount,
+            rect.right,
+            rect.bottom + shiftAmount,
+          );
+        }
+
+        if (rect.bottom > viewSize.height) {
+          final shiftAmount = rect.bottom - viewSize.height;
+          rect = Rect.fromLTRB(
+            rect.left,
+            rect.top - shiftAmount,
+            rect.right,
+            rect.bottom - shiftAmount,
+          );
+        }
+      }
+
+      final radius = Radius.circular(tooltipData.tooltipRoundedRadius);
+      final roundedRect = RRect.fromRectAndCorners(rect,
+          topLeft: radius, topRight: radius, bottomLeft: radius, bottomRight: radius);
+      _bgTouchTooltipPaint.color = tooltipData.tooltipBgColor;
+      canvasWrapper.drawRRect(roundedRect, _bgTouchTooltipPaint);
+
+      /// draw the texts one by one in below of each other
+
+      final drawOffset = Offset(
+        rect.center.dx - (tp.width / 2),
+        rect.topCenter.dy + tooltipData.tooltipPadding.top,
+      );
+      canvasWrapper.drawText(tp, drawOffset);
+    }
+    if (drawingTextPainters.isEmpty) {
+      return;
+    }
   }
 }

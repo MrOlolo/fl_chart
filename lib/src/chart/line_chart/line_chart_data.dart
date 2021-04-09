@@ -35,6 +35,12 @@ class LineChartData extends AxisChartData with EquatableMixin {
   /// just put line indicator number and spots indices you want to show it on top of them.
   final List<ShowingTooltipIndicators> showingTooltipIndicators;
 
+  /// You can show touch indicator when you not tap the graph
+  final bool alwaysShowTouchIndicator;
+
+  /// Choose which touch indicator shows at the top
+  final bool showMaxValueAtTheTop;
+
   /// [LineChart] draws some lines in various shapes and overlaps them.
   /// lines are defined in [lineBarsData], sometimes you need to fill space between two bars
   /// with a color or gradient, you can use [betweenBarsData] to achieve that.
@@ -79,12 +85,16 @@ class LineChartData extends AxisChartData with EquatableMixin {
     double? maxY,
     FlClipData? clipData,
     Color? backgroundColor,
+    bool? alwaysShowTouchIndicator,
+    bool? showMaxValueAtTheTop,
   })  : lineBarsData = lineBarsData ?? const [],
         betweenBarsData = betweenBarsData ?? const [],
         titlesData = titlesData ?? FlTitlesData(),
         extraLinesData = extraLinesData ?? ExtraLinesData(),
         lineTouchData = lineTouchData ?? LineTouchData(),
         showingTooltipIndicators = showingTooltipIndicators ?? const [],
+        showMaxValueAtTheTop = showMaxValueAtTheTop ?? false,
+        alwaysShowTouchIndicator = alwaysShowTouchIndicator ?? false,
         super(
           gridData: gridData ?? FlGridData(),
           touchData: lineTouchData ?? LineTouchData(),
@@ -145,6 +155,8 @@ class LineChartData extends AxisChartData with EquatableMixin {
     double? maxY,
     FlClipData? clipData,
     Color? backgroundColor,
+    bool? alwaysShowTouchIndicator,
+    bool? showMaxValueAtTheTop,
   }) {
     return LineChartData(
       lineBarsData: lineBarsData ?? this.lineBarsData,
@@ -163,6 +175,8 @@ class LineChartData extends AxisChartData with EquatableMixin {
       maxY: maxY ?? this.maxY,
       clipData: clipData ?? this.clipData,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      alwaysShowTouchIndicator: alwaysShowTouchIndicator ?? this.alwaysShowTouchIndicator,
+      showMaxValueAtTheTop: showMaxValueAtTheTop ?? this.showMaxValueAtTheTop,
     );
   }
 
@@ -185,6 +199,8 @@ class LineChartData extends AxisChartData with EquatableMixin {
         maxY,
         clipData,
         backgroundColor,
+        showMaxValueAtTheTop,
+        alwaysShowTouchIndicator,
       ];
 }
 
@@ -802,6 +818,9 @@ class FlDotCirclePainter extends FlDotPainter {
   /// The stroke width to use for the circle
   double strokeWidth;
 
+  /// Shadow
+  List<Shadow> shadow;
+
   /// The color of the circle is determined determined by [color],
   /// [radius] determines the radius of the circle.
   /// You can have a stroke line around the circle,
@@ -812,14 +831,26 @@ class FlDotCirclePainter extends FlDotPainter {
     double? radius,
     Color? strokeColor,
     double? strokeWidth,
+    List<Shadow>? shadow,
   })  : color = color ?? Colors.green,
         radius = radius ?? 4.0,
         strokeColor = strokeColor ?? Colors.green.darken(),
-        strokeWidth = strokeWidth ?? 1.0;
+        strokeWidth = strokeWidth ?? 1.0,
+        shadow = shadow ?? [];
 
   /// Implementation of the parent class to draw the circle
   @override
   void draw(Canvas canvas, FlSpot spot, Offset offsetInCanvas) {
+    ///draw shadows
+    for (var item in shadow) {
+      canvas.drawCircle(
+          offsetInCanvas.translate(item.offset.dx, item.offset.dy),
+          radius,
+          Paint()
+            ..color = item.color
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, item.blurSigma));
+    }
+
     if (strokeWidth != 0.0 && strokeColor.opacity != 0.0) {
       canvas.drawCircle(
           offsetInCanvas,
@@ -1514,6 +1545,21 @@ class LineTouchTooltipData with EquatableMixin {
   /// Forces the tooltip container to top of the line, default 'false'
   final bool showOnTopOfTheChartBoxArea;
 
+  /// Custom tooltip labels
+  /// Use another drawing methods
+  /// Showing tooltip at axis
+  final bool customTooltipLabels;
+
+  /// Custom tooltip labels
+  /// Use another drawing methods
+  /// Showing tooltip at X-axis
+  final bool customTooltipLabelsShowAtAxisX;
+
+  /// Custom tooltip labels
+  /// Use another drawing methods
+  /// Showing tooltip at Y-axis
+  final bool customTooltipLabelsShowAtAxisY;
+
   /// if [LineTouchData.handleBuiltInTouches] is true,
   /// [LineChart] shows a tooltip popup on top of spots automatically when touch happens,
   /// otherwise you can show it manually using [LineChartData.showingTooltipIndicators].
@@ -1537,6 +1583,9 @@ class LineTouchTooltipData with EquatableMixin {
     bool? fitInsideHorizontally,
     bool? fitInsideVertically,
     bool? showOnTopOfTheChartBoxArea,
+    bool? customTooltipLabels,
+    bool? customTooltipLabelsShowAtAxisY,
+    bool? customTooltipLabelsShowAtAxisX,
   })  : tooltipBgColor = tooltipBgColor ?? Colors.white,
         tooltipRoundedRadius = tooltipRoundedRadius ?? 4,
         tooltipPadding = tooltipPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1546,6 +1595,9 @@ class LineTouchTooltipData with EquatableMixin {
         fitInsideHorizontally = fitInsideHorizontally ?? false,
         fitInsideVertically = fitInsideVertically ?? false,
         showOnTopOfTheChartBoxArea = showOnTopOfTheChartBoxArea ?? false,
+        customTooltipLabels = customTooltipLabels ?? false,
+        customTooltipLabelsShowAtAxisY = customTooltipLabelsShowAtAxisY ?? true,
+        customTooltipLabelsShowAtAxisX = customTooltipLabelsShowAtAxisX ?? true,
         super();
 
   /// Used for equality check, see [EquatableMixin].
@@ -1560,6 +1612,9 @@ class LineTouchTooltipData with EquatableMixin {
         fitInsideHorizontally,
         fitInsideVertically,
         showOnTopOfTheChartBoxArea,
+        customTooltipLabels,
+        customTooltipLabelsShowAtAxisX,
+        customTooltipLabelsShowAtAxisY,
       ];
 }
 
@@ -1634,6 +1689,20 @@ class LineTooltipItem with EquatableMixin {
   /// List<TextSpan> add further style and format to the text of the tooltip
   final List<TextSpan>? children;
 
+  ///
+  /// Text for customTooltipLabels, for default use [text]
+  final String textAxisX;
+
+  final String textAxisY;
+
+  /// Style for customTooltipLabels, for default use [textStyle].
+  final TextStyle textStyleAxisX;
+
+  /// Style for customTooltipLabels, for default use [textStyle].
+  final TextStyle textStyleAxisY;
+
+  ///
+
   /// Shows a [text] with [textStyle], [textDirection],
   /// and optional [children] as a row in the tooltip popup.
   LineTooltipItem(
@@ -1642,7 +1711,14 @@ class LineTooltipItem with EquatableMixin {
     this.textAlign = TextAlign.center,
     this.textDirection = TextDirection.ltr,
     this.children,
-  });
+    String? textAxisX,
+    String? textAxisY,
+    TextStyle? textStyleAxisX,
+    TextStyle? textStyleAxisY,
+  })  : textAxisX = textAxisX ?? text,
+        textAxisY = textAxisY ?? text,
+        textStyleAxisX = textStyleAxisX ?? textStyle,
+        textStyleAxisY = textStyleAxisY ?? textStyle;
 
   /// Used for equality check, see [EquatableMixin].
   @override
@@ -1652,6 +1728,10 @@ class LineTooltipItem with EquatableMixin {
         textAlign,
         textDirection,
         children,
+        textAxisX,
+        textAxisY,
+        textStyleAxisX,
+        textStyleAxisY,
       ];
 }
 
