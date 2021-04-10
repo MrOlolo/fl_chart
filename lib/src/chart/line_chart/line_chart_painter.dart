@@ -1666,11 +1666,12 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
       }
 
       /// For drawing the indicator line
-      final lineStartY =
+      final lineStartX =
           min(data.maxX, max(data.minX, data.lineTouchData.getTouchLineStart(barData, index)));
       final lineEndY =
           min(data.maxY, max(data.minY, data.lineTouchData.getTouchLineEnd(barData, index)));
-      final lineStart = Offset(lineStartY, getPixelY(lineEndY, chartViewSize, holder));
+      final lineStart = Offset(lineStartX + holder.data.titlesData.leftTitles.reservedSize,
+          getPixelY(lineEndY, chartViewSize, holder));
       var lineEnd = Offset(touchedSpot.dx, getPixelY(lineEndY, chartViewSize, holder));
 
       /// If line end is inside the dot, adjust it so that it doesn't overlap with the dot.
