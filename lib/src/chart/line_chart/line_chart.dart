@@ -89,9 +89,11 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
       showingTooltipIndicators: _showingTouchedTooltips,
       lineBarsData: lineChartData.lineBarsData.map((barData) {
         final index = lineChartData.lineBarsData.indexOf(barData);
-        var defaultIndicators = <int>[];
-        if (lineChartData.alwaysShowTouchIndicator) {
+        late final List<int> defaultIndicators;
+        if (_getData().alwaysShowTouchIndicator) {
           defaultIndicators = [lineChartData.lineBarsData[index].spots.length - 1];
+        } else {
+          defaultIndicators = <int>[];
         }
         return barData.copyWith(
           showingIndicators: _showingTouchedIndicators[index] ?? defaultIndicators,
