@@ -54,8 +54,35 @@ int lerpInt(int a, int b, double t) => (a + (b - a) * t).round();
 double _lerpNonNullDouble(double a, double b, double t) => lerpDouble(a, b, t)!;
 
 /// Lerps [FlSpot] list based on [t] value, check [Tween.lerp].
-List<FlSpot>? lerpFlSpotList(List<FlSpot>? a, List<FlSpot>? b, double t) =>
-    _lerpList(a, b, t, lerp: FlSpot.lerp);
+List<FlSpot>? lerpFlSpotList(List<FlSpot>? a, List<FlSpot>? b, double t) {
+  // print('lerp');
+  // print(a?.length);
+  // print(b?.length);
+  // // print(_lerpList(a, b, t, lerp: FlSpot.lerp));
+  // var firstListSet = a?.toSet();
+  // var secondListSet = b?.toSet();
+  // if (secondListSet?.containsAll(firstListSet ?? {}) ?? false) {
+  //   if (t >= 0.8) {
+  //     print('1111');
+  //     final difference = secondListSet?.difference(firstListSet ?? {}) ?? {};
+  //     final step = (1 - 0.8) / difference.length;
+  //     print(((1 - t) / step).round());
+  //     return [...firstListSet!, ...difference.toList().sublist(0, ((t - 0.8) / step).round())];
+  //   }
+  //   return firstListSet?.toList();
+  // } else if (firstListSet?.containsAll(secondListSet ?? {}) ?? false) {
+  //   if (t >= 0.8) {
+  //     print('2222');
+  //     final difference = firstListSet?.difference(secondListSet ?? {}) ?? {};
+  //     final step = (1 - 0.8) / difference.length;
+  //     return [...secondListSet!, ...difference.toList().sublist(0, ((t - 0.8) / step).round())];
+  //   }
+  //   return secondListSet?.toList();
+  // }
+  // print('lerp1');
+
+  return _lerpList(a, b, t, lerp: FlSpot.lerp);
+}
 
 /// Lerps [HorizontalLine] list based on [t] value, check [Tween.lerp].
 List<HorizontalLine>? lerpHorizontalLineList(

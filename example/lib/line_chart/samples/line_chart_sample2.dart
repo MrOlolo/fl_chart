@@ -56,6 +56,7 @@ class _LineChartSample2State extends State<LineChartSample2> {
 
   LineChartData mainData() {
     return LineChartData(
+      alwaysShowTouchIndicator: true,
       gridData: FlGridData(
         show: true,
         drawVerticalLine: true,

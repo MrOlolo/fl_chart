@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui';
 
 class LineChartSample1 extends StatefulWidget {
   @override
@@ -8,11 +9,21 @@ class LineChartSample1 extends StatefulWidget {
 
 class LineChartSample1State extends State<LineChartSample1> {
   bool isShowingMainData;
+  List<FlSpot> spots;
 
   @override
   void initState() {
     super.initState();
     isShowingMainData = true;
+    spots = [
+      FlSpot(1, 1),
+      FlSpot(3, 4),
+      FlSpot(5, 1.8),
+      FlSpot(7, 5),
+      FlSpot(10, 2),
+      FlSpot(12, 2.2),
+      FlSpot(13, 1.8),
+    ];
   }
 
   @override
@@ -66,8 +77,9 @@ class LineChartSample1State extends State<LineChartSample1> {
                   child: Padding(
                     padding: const EdgeInsets.only(right: 16.0, left: 6.0),
                     child: LineChart(
-                      isShowingMainData ? sampleData1() : sampleData2(),
-                      swapAnimationDuration: const Duration(milliseconds: 250),
+                      isShowingMainData ? sampleData1(spots) : sampleData2(),
+                      swapAnimationDuration: const Duration(milliseconds: 3000),
+                      resetTouchIndicatorOnTapUp: true,
                     ),
                   ),
                 ),
@@ -76,16 +88,52 @@ class LineChartSample1State extends State<LineChartSample1> {
                 ),
               ],
             ),
-            IconButton(
-              icon: Icon(
-                Icons.refresh,
-                color: Colors.white.withOpacity(isShowingMainData ? 1.0 : 0.5),
-              ),
-              onPressed: () {
-                setState(() {
-                  isShowingMainData = !isShowingMainData;
-                });
-              },
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.remove,
+                    color: Colors.white.withOpacity(isShowingMainData ? 1.0 : 0.5),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      spots = List.of(spots.sublist(0, spots.length - 15));
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Colors.white.withOpacity(isShowingMainData ? 1.0 : 0.5),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isShowingMainData = !isShowingMainData;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.white.withOpacity(isShowingMainData ? 1.0 : 0.5),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      final last = spots.last;
+                      spots = List.of([
+                        ...spots,
+                        FlSpot(last.x + 0.1, last.y + 0.1),
+                        FlSpot(last.x + 0.21, last.y + 0.21),
+                        FlSpot(last.x + 0.31, last.y + 0.1),
+                        FlSpot(last.x + 0.41, last.y + 0.21),
+                        FlSpot(last.x + 0.51, last.y + 0.1),
+                        FlSpot(last.x + 0.61, last.y + 0.21)
+                      ]);
+                    });
+                  },
+                ),
+              ],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
             )
           ],
         ),
@@ -93,11 +141,47 @@ class LineChartSample1State extends State<LineChartSample1> {
     );
   }
 
-  LineChartData sampleData1() {
+  LineChartData sampleData1(List<FlSpot> spots) {
     return LineChartData(
+      alwaysShowTouchIndicator: true,
       lineTouchData: LineTouchData(
+        getTouchedSpotIndicator: (barData, spotIndexes) => List.filled(
+            spotIndexes.length,
+            TouchedSpotIndicatorData(
+                FlLine(
+                  color: Color.fromARGB(51, 255, 148, 167),
+                  strokeWidth: 1.0,
+                ),
+                FlDotData(
+                    getDotPainter: (flSpot, double, lineChartBarData, int) => FlDotCirclePainter(
+                            radius: 9.0,
+                            color: Colors.blue,
+                            strokeWidth: 0.0,
+                            shadow: [
+                              Shadow(
+                                  color: Color.fromARGB(128, 255, 250, 250),
+                                  offset: Offset(0.0, 4.0),
+                                  blurRadius: 20.0),
+                              Shadow(
+                                  color: Color.fromARGB(64, 0, 0, 0),
+                                  offset: Offset(0.0, 4.0),
+                                  blurRadius: 4.0),
+                              Shadow(
+                                  color: Color.fromARGB(64, 0, 0, 0),
+                                  offset: Offset(0.0, 4.0),
+                                  blurRadius: 4.0)
+                            ])))),
         touchTooltipData: LineTouchTooltipData(
-          tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
+          maxContentWidth: 150,
+          tooltipBgColor: Colors.transparent,
+          getTooltipItems: (touchedSpots) => touchedSpots.map((element) {
+            return LineTooltipItem('1', TextStyle(fontSize: 20), textAxisX: 'x', textAxisY: 'y');
+          }).toList(),
+          tooltipRoundedRadius: 10.0,
+          fitInsideHorizontally: true,
+          fitInsideVertically: true,
+          customTooltipLabels: true,
+          tooltipPadding: EdgeInsets.only(left: 17.0, right: 10.0, top: 2.0, bottom: 2.0),
         ),
         touchCallback: (LineTouchResponse touchResponse) {},
         handleBuiltInTouches: true,
@@ -124,6 +208,9 @@ class LineChartSample1State extends State<LineChartSample1> {
               case 12:
                 return 'DEC';
             }
+            if (value.toInt() % 5 == 0 && value.toInt() > 10) {
+              return 'Kek';
+            }
             return '';
           },
         ),
@@ -144,6 +231,9 @@ class LineChartSample1State extends State<LineChartSample1> {
                 return '3m';
               case 4:
                 return '5m';
+            }
+            if (value.toInt() % 1 == 0 && value.toInt() > 4) {
+              return 'Kekm';
             }
             return '';
           },
@@ -170,24 +260,16 @@ class LineChartSample1State extends State<LineChartSample1> {
         ),
       ),
       minX: 0,
-      maxX: 14,
-      maxY: 4,
+      // maxX: 14,
+      // maxY: 4,
       minY: 0,
-      lineBarsData: linesBarData1(),
+      lineBarsData: linesBarData1(spots),
     );
   }
 
-  List<LineChartBarData> linesBarData1() {
+  List<LineChartBarData> linesBarData1(List<FlSpot> spots) {
     final LineChartBarData lineChartBarData1 = LineChartBarData(
-      spots: [
-        FlSpot(1, 1),
-        FlSpot(3, 1.5),
-        FlSpot(5, 1.4),
-        FlSpot(7, 3.4),
-        FlSpot(10, 2),
-        FlSpot(12, 2.2),
-        FlSpot(13, 1.8),
-      ],
+      spots: spots,
       isCurved: true,
       colors: [
         const Color(0xff4af699),
@@ -246,8 +328,8 @@ class LineChartSample1State extends State<LineChartSample1> {
     );
     return [
       lineChartBarData1,
-      lineChartBarData2,
-      lineChartBarData3,
+      // lineChartBarData2,
+      // lineChartBarData3,
     ];
   }
 

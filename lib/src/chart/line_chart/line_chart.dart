@@ -34,6 +34,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   /// we handle under the hood animations (implicit animations) via this tween,
   /// it lerps between the old [LineChartData] to the new one.
   LineChartDataTween? _lineChartDataTween;
+  FlSpotsTween? _spotsTween;
 
   final List<ShowingTooltipIndicators> _showingTouchedTooltips = [];
 
@@ -42,9 +43,29 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   bool needClear = false;
 
   @override
+  void didUpdateWidget(covariant LineChart oldWidget) {
+    // print('didUpdateWidget');
+    // print(_lineChartDataTween?.begin?.lineBarsData.first.spots.length);
+    // print(_lineChartDataTween?.end?.lineBarsData.first.spots.length);
+    // print('didUpdateWidget hmm');
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didUpdateTweens() {
+    // print('didUpdateTweens');
+    // print(_lineChartDataTween?.begin?.lineBarsData.first.spots.length);
+    // print(_lineChartDataTween?.end?.lineBarsData.first.spots.length);
+    // print('didUpdateTweens hmm');
+    super.didUpdateTweens();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final showingData = _getData();
-
+    // print('build');
+    // print(_lineChartDataTween!.evaluate(animation).lineBarsData.first.spots.length);
+    // print(animation);
     if (needClear) {
       needClear = false;
 
@@ -61,10 +82,16 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     /// Wr wrapped our chart with [GestureDetector], and onLongPressStart callback.
     /// because we wanted to lock the widget from being scrolled when user long presses on it.
     /// If we found a solution for solve this issue, then we can remove this undoubtedly.
+    final chart = _lineChartDataTween!.evaluate(
+        CurvedAnimation(parent: controller, curve: Interval(0, 0.75, curve: widget.curve)));
     return GestureDetector(
       onLongPressStart: (details) {},
       child: LineChartLeaf(
-        data: _withTouchedIndicators(_lineChartDataTween!.evaluate(animation)),
+        data: _withTouchedIndicators(chart.copyWith(lineBarsData: [
+          chart.lineBarsData.first.copyWith(
+              spots: _spotsTween!.evaluate(CurvedAnimation(
+                  parent: controller, curve: Interval(0.75, 1, curve: widget.curve))))
+        ])),
         targetData: _withTouchedIndicators(showingData),
         touchCallback: _handleBuiltInTouch,
       ),
@@ -103,6 +130,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   }
 
   LineChartData _getData() {
+    // print('getData');
     final lineTouchData = widget.data.lineTouchData;
     if (lineTouchData.enabled && lineTouchData.handleBuiltInTouches) {
       return widget.data.copyWith(
@@ -162,6 +190,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
+    // print('forEachTween');
     var barData = _lineChartDataTween?.end?.lineBarsData.first;
     var spots = barData?.spots;
     if (spots != null && spots.isNotEmpty) {
@@ -184,10 +213,30 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         }
       }
     }
+    // print('kekWait');
+    // print(_lineChartDataTween?.begin?.lineBarsData.first.spots.length);
+    // print(_lineChartDataTween?.end?.lineBarsData.first.spots.length);
+    // print('kekWait hmm');
     _lineChartDataTween = visitor(
       _lineChartDataTween,
       _getData(),
-      (dynamic value) => LineChartDataTween(begin: value, end: widget.data),
+      (dynamic value) {
+        // print('hello at visitor');
+        // print((value as LineChartData).lineBarsData.first.spots.length);
+        // print('end of visitor');
+        return LineChartDataTween(begin: value, end: widget.data);
+      },
     ) as LineChartDataTween;
+
+    _spotsTween = visitor(
+      _spotsTween,
+      _getData().lineBarsData.first.spots,
+      (dynamic value) {
+        return FlSpotsTween(begin: value, end: widget.data.lineBarsData.first.spots);
+      },
+    ) as FlSpotsTween;
+    // print(_lineChartDataTween?.begin?.lineBarsData.first.spots.length);
+    // print(_lineChartDataTween?.end?.lineBarsData.first.spots.length);
+    // print('kekWait ok');
   }
 }

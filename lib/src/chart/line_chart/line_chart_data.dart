@@ -1819,10 +1819,47 @@ class LineTouchResponse extends BaseTouchResponse {
 
 /// It lerps a [LineChartData] to another [LineChartData] (handles animation for updating values)
 class LineChartDataTween extends Tween<LineChartData> {
-  LineChartDataTween({required LineChartData begin, required LineChartData end})
-      : super(begin: begin, end: end);
+  LineChartDataTween({LineChartData? begin, LineChartData? end}) : super(begin: begin, end: end);
 
   /// Lerps a [LineChartData] based on [t] value, check [Tween.lerp].
   @override
   LineChartData lerp(double t) => begin!.lerp(begin!, end!, t);
+}
+
+class FlSpotsTween extends Tween<List<FlSpot>> {
+  FlSpotsTween({List<FlSpot>? begin, List<FlSpot>? end}) : super(begin: begin, end: end);
+
+  /// Lerps a [FlSpot] based on [t] value, check [Tween.lerp].
+  @override
+  List<FlSpot> lerp(double t) => _lerpFlSpotList(begin, end, t);
+
+  static List<FlSpot> _lerpFlSpotList(List<FlSpot>? a, List<FlSpot>? b, double t) {
+    // print('lerp');
+    // print(a?.length);
+    // print(b?.length);
+    // print(_lerpList(a, b, t, lerp: FlSpot.lerp));
+    var firstListSet = a?.toSet();
+    var secondListSet = b?.toSet();
+    if (a == null || a.isEmpty) return b ?? [];
+    if (b == null || b.isEmpty) return a;
+    if (a.length == b.length) return a;
+    if (secondListSet?.containsAll(firstListSet ?? {}) ?? false) {
+      // print('add');
+      final difference = secondListSet?.difference(firstListSet ?? {}) ?? {};
+      final step = 1 / difference.length;
+      // print((t / step).round());
+      return [...firstListSet!, ...difference.toList().sublist(0, (t / step).round())];
+    } else if (firstListSet?.containsAll(secondListSet ?? {}) ?? false) {
+      // print('substract');
+      final difference = firstListSet?.difference(secondListSet ?? {}) ?? {};
+      final step = 1 / difference.length;
+      final index = ((1 - t) / step).round();
+      // print(index);
+      return [...secondListSet!, ...difference.toList().sublist(0, index >= 0 ? index : 0)];
+    } else {
+      // print('else');
+      if (a.length > b.length) return b;
+      return a;
+    }
+  }
 }
