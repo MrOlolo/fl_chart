@@ -83,14 +83,14 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     /// because we wanted to lock the widget from being scrolled when user long presses on it.
     /// If we found a solution for solve this issue, then we can remove this undoubtedly.
     final chart = _lineChartDataTween!.evaluate(
-        CurvedAnimation(parent: controller, curve: Interval(0, 0.75, curve: widget.curve)));
+        CurvedAnimation(parent: controller, curve: Interval(0, 0.45, curve: widget.curve)));
     return GestureDetector(
       onLongPressStart: (details) {},
       child: LineChartLeaf(
         data: _withTouchedIndicators(chart.copyWith(lineBarsData: [
           chart.lineBarsData.first.copyWith(
               spots: _spotsTween!.evaluate(CurvedAnimation(
-                  parent: controller, curve: Interval(0.75, 1, curve: widget.curve))))
+                  parent: controller, curve: Interval(0.50, 1, curve: Curves.easeInOut))))
         ])),
         targetData: _withTouchedIndicators(showingData),
         touchCallback: _handleBuiltInTouch,
