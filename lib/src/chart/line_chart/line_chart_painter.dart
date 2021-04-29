@@ -1530,8 +1530,6 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
           getPixelY(lineStartY, chartViewSize, holder) +
               holder.data.titlesData.bottomTitles.margin);
       var lineEnd = Offset(touchedSpot.dx, getPixelY(lineEndY, chartViewSize, holder));
-      print(lineStartY);
-      print('lineStart');
 
       /// If line end is inside the dot, adjust it so that it doesn't overlap with the dot.
       final dotMinY = touchedSpot.dy - dotHeight / 2;
