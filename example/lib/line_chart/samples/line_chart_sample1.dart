@@ -80,6 +80,7 @@ class LineChartSample1State extends State<LineChartSample1> {
                       isShowingMainData ? sampleData1(spots) : sampleData2(),
                       swapAnimationDuration: const Duration(milliseconds: 3000),
                       resetTouchIndicatorOnTapUp: true,
+                      useLineAnimation: true,
                     ),
                   ),
                 ),
@@ -121,7 +122,7 @@ class LineChartSample1State extends State<LineChartSample1> {
                     setState(() {
                       final last = spots.last;
                       spots = List.of([
-                        ...spots,
+                        // ...spots,
                         FlSpot(last.x + 0.1, last.y + 0.1),
                         FlSpot(last.x + 0.21, last.y + 0.21),
                         FlSpot(last.x + 0.31, last.y + 0.1),
@@ -259,10 +260,10 @@ class LineChartSample1State extends State<LineChartSample1> {
           ),
         ),
       ),
-      minX: 0,
+      // minX: 0,
       // maxX: 14,
       // maxY: 4,
-      minY: 0,
+      // minY: 0,
       lineBarsData: linesBarData1(spots),
     );
   }
