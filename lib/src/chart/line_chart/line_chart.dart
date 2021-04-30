@@ -13,6 +13,12 @@ class LineChart extends ImplicitlyAnimatedWidget {
   ///Determines the behavior of touch indicator
   final bool resetTouchIndicatorOnTapUp;
 
+  ///Determines the curve for line drawing animation when it enable
+  final Curve lineAnimationCurve;
+
+  ///Enable staggered animation for chart swap(draw line after graph swap-animation)
+  final bool useLineAnimation;
+
   /// [data] determines how the [LineChart] should be look like,
   /// when you make any change in the [LineChartData], it updates
   /// new values with animation, and duration is [swapAnimationDuration].
@@ -23,6 +29,8 @@ class LineChart extends ImplicitlyAnimatedWidget {
     Duration swapAnimationDuration = const Duration(milliseconds: 150),
     Curve swapAnimationCurve = Curves.linear,
     this.resetTouchIndicatorOnTapUp = false,
+    this.useLineAnimation = false,
+    this.lineAnimationCurve = Curves.easeInOut,
   }) : super(duration: swapAnimationDuration, curve: swapAnimationCurve);
 
   /// Creates a [_LineChartState]
@@ -41,24 +49,6 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   final Map<int, List<int>> _showingTouchedIndicators = {};
 
   bool needClear = false;
-
-  @override
-  void didUpdateWidget(covariant LineChart oldWidget) {
-    // print('didUpdateWidget');
-    // print(_lineChartDataTween?.begin?.lineBarsData.first.spots.length);
-    // print(_lineChartDataTween?.end?.lineBarsData.first.spots.length);
-    // print('didUpdateWidget hmm');
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void didUpdateTweens() {
-    // print('didUpdateTweens');
-    // print(_lineChartDataTween?.begin?.lineBarsData.first.spots.length);
-    // print(_lineChartDataTween?.end?.lineBarsData.first.spots.length);
-    // print('didUpdateTweens hmm');
-    super.didUpdateTweens();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,16 +72,23 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     /// Wr wrapped our chart with [GestureDetector], and onLongPressStart callback.
     /// because we wanted to lock the widget from being scrolled when user long presses on it.
     /// If we found a solution for solve this issue, then we can remove this undoubtedly.
-    final chart = _lineChartDataTween!.evaluate(
-        CurvedAnimation(parent: controller, curve: Interval(0, 0.45, curve: widget.curve)));
+    late final LineChartData chart;
+    if (widget.useLineAnimation) {
+      final temp = _lineChartDataTween!.evaluate(
+          CurvedAnimation(parent: controller, curve: Interval(0, 0.45, curve: widget.curve)));
+      chart = temp.copyWith(lineBarsData: [
+        temp.lineBarsData.first.copyWith(
+            spots: _spotsTween!.evaluate(CurvedAnimation(
+                parent: controller, curve: Interval(0.50, 1, curve: Curves.easeInOut))))
+      ]);
+    } else {
+      chart = _lineChartDataTween!.evaluate(animation);
+    }
+
     return GestureDetector(
       onLongPressStart: (details) {},
       child: LineChartLeaf(
-        data: _withTouchedIndicators(chart.copyWith(lineBarsData: [
-          chart.lineBarsData.first.copyWith(
-              spots: _spotsTween!.evaluate(CurvedAnimation(
-                  parent: controller, curve: Interval(0.50, 1, curve: Curves.easeInOut))))
-        ])),
+        data: _withTouchedIndicators(chart),
         targetData: _withTouchedIndicators(showingData),
         touchCallback: _handleBuiltInTouch,
       ),

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
@@ -1838,24 +1839,46 @@ class FlSpotsTween extends Tween<List<FlSpot>> {
     // print(a?.length);
     // print(b?.length);
     // print(_lerpList(a, b, t, lerp: FlSpot.lerp));
-    var firstListSet = a?.toSet();
-    var secondListSet = b?.toSet();
-    if (a == null || a.isEmpty) return b ?? [];
-    if (b == null || b.isEmpty) return a;
-    if (a.length == b.length) return a;
-    if (secondListSet?.containsAll(firstListSet ?? {}) ?? false) {
+
+    if (a == null || a.isEmpty) {
+      final step = 1 / (b?.length ?? 1);
+      return b?.sublist(0, (t / step).round()) ?? [];
+    }
+    if (b == null || b.isEmpty) {
+      final step = 1 / a.length;
+      return a.sublist(0, (t / step).round());
+    }
+    final firstListSet = a.toSet();
+    final secondListSet = b.toSet();
+
+    if (secondListSet.intersection(firstListSet).length <
+        min(secondListSet.length, firstListSet.length)) {
+      // print('different lines');
+      final step = 1 / (firstListSet.length + secondListSet.length - 2);
+      final firstListIndex = max(firstListSet.length - (t / step).round(), 0);
+      final secondListIndex = max((t / step).round() + 1 - firstListSet.length, 0);
+      // print((t / step).round());
+      // print(firstListIndex);
+      // print(secondListIndex);
+      return [
+        ...firstListSet.toList().sublist(0, firstListIndex),
+        ...secondListSet.toList().sublist(0, secondListIndex)
+      ];
+    }
+
+    if (secondListSet.containsAll(firstListSet)) {
       // print('add');
-      final difference = secondListSet?.difference(firstListSet ?? {}) ?? {};
+      final difference = secondListSet.difference(firstListSet);
       final step = 1 / difference.length;
       // print((t / step).round());
-      return [...firstListSet!, ...difference.toList().sublist(0, (t / step).round())];
-    } else if (firstListSet?.containsAll(secondListSet ?? {}) ?? false) {
+      return [...firstListSet, ...difference.toList().sublist(0, (t / step).round())];
+    } else if (firstListSet.containsAll(secondListSet)) {
       // print('substract');
-      final difference = firstListSet?.difference(secondListSet ?? {}) ?? {};
+      final difference = firstListSet.difference(secondListSet);
       final step = 1 / difference.length;
       final index = ((1 - t) / step).round();
       // print(index);
-      return [...secondListSet!, ...difference.toList().sublist(0, index >= 0 ? index : 0)];
+      return [...secondListSet, ...difference.toList().sublist(0, index >= 0 ? index : 0)];
     } else {
       // print('else');
       if (a.length > b.length) return b;
