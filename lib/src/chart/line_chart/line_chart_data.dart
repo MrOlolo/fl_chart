@@ -1875,15 +1875,17 @@ class FlSpotsTween extends Tween<List<FlSpot>> {
         final len = firstListSet.length + secondListSet.length - 2 * intersection.length;
         final step = 1 / len;
         final firstListIndex = max(firstListSet.length - (t / step).round(), intersection.length);
-        final secondListIndex =
-            min(max((t / step).round(), intersection.length), secondListSet.length);
+        final secondListIndex = min(
+            max((t / step).round() - firstListSet.length + 2 * intersection.length,
+                intersection.length),
+            secondListSet.length);
         // print((t / step).round());
 
         // print(firstListIndex);
         // print(firstListSet.length);
 
         // print(secondListIndex);
-        // print(secondListSet.length);R
+        // print(secondListSet.length);
         return [
           ...intersection,
           ...firstListSet.toList().sublist(intersection.length, firstListIndex),
