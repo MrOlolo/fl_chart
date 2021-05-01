@@ -122,13 +122,19 @@ class LineChartSample1State extends State<LineChartSample1> {
                     setState(() {
                       final last = spots.last;
                       spots = List.of([
-                        // ...spots,
+                        FlSpot(1, 1),
+                        FlSpot(3, 4),
+                        FlSpot(5, 1.8),
+                        // FlSpot(7, 5),
+                        // FlSpot(10, 2),
+
                         FlSpot(last.x + 0.1, last.y + 0.1),
                         FlSpot(last.x + 0.21, last.y + 0.21),
+                        FlSpot(last.x + 0.30, spots.first.y),
                         FlSpot(last.x + 0.31, last.y + 0.1),
                         FlSpot(last.x + 0.41, last.y + 0.21),
-                        FlSpot(last.x + 0.51, last.y + 0.1),
-                        FlSpot(last.x + 0.61, last.y + 0.21)
+                        FlSpot(last.x + 0.61, spots.first.y),
+                        FlSpot(last.x + 1.61, last.y + 0.21)
                       ]);
                     });
                   },

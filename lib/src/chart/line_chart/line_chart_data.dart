@@ -1851,21 +1851,6 @@ class FlSpotsTween extends Tween<List<FlSpot>> {
     final firstListSet = a.toSet();
     final secondListSet = b.toSet();
 
-    if (secondListSet.intersection(firstListSet).length <
-        min(secondListSet.length, firstListSet.length)) {
-      // print('different lines');
-      final step = 1 / (firstListSet.length + secondListSet.length - 2);
-      final firstListIndex = max(firstListSet.length - (t / step).round(), 0);
-      final secondListIndex = max((t / step).round() + 1 - firstListSet.length, 0);
-      // print((t / step).round());
-      // print(firstListIndex);
-      // print(secondListIndex);
-      return [
-        ...firstListSet.toList().sublist(0, firstListIndex),
-        ...secondListSet.toList().sublist(0, secondListIndex)
-      ];
-    }
-
     if (secondListSet.containsAll(firstListSet)) {
       // print('add');
       final difference = secondListSet.difference(firstListSet);
@@ -1880,9 +1865,43 @@ class FlSpotsTween extends Tween<List<FlSpot>> {
       // print(index);
       return [...secondListSet, ...difference.toList().sublist(0, index >= 0 ? index : 0)];
     } else {
-      // print('else');
-      if (a.length > b.length) return b;
-      return a;
+      // print('different lines');
+      final intersection = secondListSet.intersection(firstListSet);
+      // print(intersection);
+      if (firstListSet.first == secondListSet.first &&
+          firstListSet.elementAt(intersection.length - 1) ==
+              secondListSet.elementAt(intersection.length - 1)) {
+        // print('new');
+        final len = firstListSet.length + secondListSet.length - 2 * intersection.length;
+        final step = 1 / len;
+        final firstListIndex = max(firstListSet.length - (t / step).round(), intersection.length);
+        final secondListIndex =
+            min(max((t / step).round(), intersection.length), secondListSet.length);
+        // print((t / step).round());
+
+        // print(firstListIndex);
+        // print(firstListSet.length);
+
+        // print(secondListIndex);
+        // print(secondListSet.length);R
+        return [
+          ...intersection,
+          ...firstListSet.toList().sublist(intersection.length, firstListIndex),
+          ...secondListSet.toList().sublist(intersection.length, secondListIndex)
+        ];
+      } else {
+        // print('old');
+        final step = 1 / (firstListSet.length + secondListSet.length - 2);
+        final firstListIndex = max(firstListSet.length - (t / step).round(), 0);
+        final secondListIndex = max((t / step).round() + 1 - firstListSet.length, 0);
+        // print((t / step).round());
+        // print(firstListIndex);
+        // print(secondListIndex);
+        return [
+          ...firstListSet.toList().sublist(0, firstListIndex),
+          ...secondListSet.toList().sublist(0, secondListIndex)
+        ];
+      }
     }
   }
 }
