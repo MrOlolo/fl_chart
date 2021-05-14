@@ -1907,3 +1907,122 @@ class FlSpotsTween extends Tween<List<FlSpot>> {
     }
   }
 }
+
+class FlSpotsTweenList extends Tween<List<List<FlSpot>>> {
+  FlSpotsTweenList({List<List<FlSpot>>? begin, List<List<FlSpot>>? end})
+      : super(begin: begin, end: end);
+
+  /// Lerps a [FlSpot] based on [t] value, check [Tween.lerp].
+  @override
+  List<List<FlSpot>> lerp(double t) => _lerpFlSpotTweenList(begin, end, t);
+
+  static List<List<FlSpot>> _lerpFlSpotTweenList(
+      List<List<FlSpot>>? a, List<List<FlSpot>>? b, double t) {
+    // print('lerp');
+    // print(a?.length);
+    // print(b?.length);
+    // print(_lerpList(a, b, t, lerp: FlSpot.lerp));
+    if (a == null || a.isEmpty) {
+      return b?.map((e) => _lerpFlSpotList(null, e, t)).toList() ??
+          [
+            [FlSpot(0, 0)]
+          ];
+    }
+
+    if (b == null || b.isEmpty) {
+      return a.map((e) => _lerpFlSpotList(e, null, t)).toList();
+    }
+
+    final len = max(a.length, b.length);
+    final data = <List<FlSpot>>[];
+    for (var i = 0; i < len; i++) {
+      List<FlSpot>? first, second;
+      try {
+        first = a.elementAt(i);
+      } catch (e) {}
+
+      try {
+        second = b.elementAt(i);
+      } catch (e) {}
+      data.add(_lerpFlSpotList(first, second, t));
+    }
+    return data;
+  }
+
+  static List<FlSpot> _lerpFlSpotList(List<FlSpot>? a, List<FlSpot>? b, double t) {
+    // print('lerp');
+    // print(a?.length);
+    // print(b?.length);
+    // print(_lerpList(a, b, t, lerp: FlSpot.lerp));
+
+    if (a == null || a.isEmpty) {
+      final step = 1 / (b?.length ?? 1);
+      var index = (t / step).round();
+      if (index == 0) index = 1;
+      return b?.sublist(0, index) ?? [FlSpot(0, 0)];
+    }
+    if (b == null || b.isEmpty) {
+      final step = 1 / a.length;
+      var index = a.length - (t / step).round();
+      if (index < 1) index = 1;
+      return a.sublist(0, index);
+    }
+    final firstListSet = a.toSet();
+    final secondListSet = b.toSet();
+
+    if (secondListSet.containsAll(firstListSet)) {
+      // print('add');
+      final difference = secondListSet.difference(firstListSet);
+      final step = 1 / difference.length;
+      // print((t / step).round());
+      return [...firstListSet, ...difference.toList().sublist(0, (t / step).round())];
+    } else if (firstListSet.containsAll(secondListSet)) {
+      // print('substract');
+      final difference = firstListSet.difference(secondListSet);
+      final step = 1 / difference.length;
+      final index = ((1 - t) / step).round();
+      // print(index);
+      return [...secondListSet, ...difference.toList().sublist(0, index >= 0 ? index : 0)];
+    } else {
+      // print('different lines');
+      final intersection = secondListSet.intersection(firstListSet);
+      // print(intersection);
+      if (firstListSet.first == secondListSet.first &&
+          firstListSet.elementAt(intersection.length - 1) ==
+              secondListSet.elementAt(intersection.length - 1)) {
+        // print('new');
+        final len = firstListSet.length + secondListSet.length - 2 * intersection.length;
+        final step = 1 / len;
+        final firstListIndex = max(firstListSet.length - (t / step).round(), intersection.length);
+        final secondListIndex = min(
+            max((t / step).round() - firstListSet.length + 2 * intersection.length,
+                intersection.length),
+            secondListSet.length);
+        // print((t / step).round());
+
+        // print(firstListIndex);
+        // print(firstListSet.length);
+
+        // print(secondListIndex);
+        // print(secondListSet.length);
+        return [
+          ...intersection,
+          ...firstListSet.toList().sublist(intersection.length, firstListIndex),
+          ...secondListSet.toList().sublist(intersection.length, secondListIndex)
+        ];
+      } else {
+        // print('old');
+        final step = 1 / (firstListSet.length + secondListSet.length - 2);
+        final firstListIndex = max(firstListSet.length - (t / step).round(), 0);
+        final secondListIndex = max((t / step).round() + 1 - firstListSet.length, 0);
+        // print((t / step).round());
+        // print(firstListIndex);
+        // print(secondListIndex);
+        return [
+          ...firstListSet.toList().sublist(0, firstListIndex),
+          ...secondListSet.toList().sublist(0, secondListIndex)
+        ];
+      }
+    }
+  }
+}

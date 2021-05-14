@@ -10,6 +10,7 @@ class LineChartSample1 extends StatefulWidget {
 class LineChartSample1State extends State<LineChartSample1> {
   bool isShowingMainData;
   List<FlSpot> spots;
+  int lines = 0;
 
   @override
   void initState() {
@@ -98,7 +99,11 @@ class LineChartSample1State extends State<LineChartSample1> {
                   ),
                   onPressed: () {
                     setState(() {
-                      spots = List.of(spots.sublist(0, spots.length - 15));
+                      if (lines < 1) {
+                        spots = List.of(spots.sublist(0, spots.length - 5));
+                      } else {
+                        lines--;
+                      }
                     });
                   },
                 ),
@@ -120,22 +125,26 @@ class LineChartSample1State extends State<LineChartSample1> {
                   ),
                   onPressed: () {
                     setState(() {
-                      final last = spots.last;
-                      spots = List.of([
-                        FlSpot(1, 1),
-                        FlSpot(3, 4),
-                        FlSpot(5, 1.8),
-                        // FlSpot(7, 5),
-                        // FlSpot(10, 2),
+                      if (lines > 2) {
+                        final last = spots.last;
+                        spots = List.of([
+                          FlSpot(1, 1),
+                          FlSpot(3, 4),
+                          FlSpot(5, 1.8),
+                          // FlSpot(7, 5),
+                          // FlSpot(10, 2),
 
-                        FlSpot(last.x + 0.1, last.y + 0.1),
-                        FlSpot(last.x + 0.21, last.y + 0.21),
-                        FlSpot(last.x + 0.30, spots.first.y),
-                        FlSpot(last.x + 0.31, last.y + 0.1),
-                        FlSpot(last.x + 0.41, last.y + 0.21),
-                        FlSpot(last.x + 0.61, spots.first.y),
-                        FlSpot(last.x + 1.61, last.y + 0.21)
-                      ]);
+                          FlSpot(last.x + 0.1, last.y + 0.1),
+                          FlSpot(last.x + 0.21, last.y + 0.21),
+                          FlSpot(last.x + 0.30, spots.first.y),
+                          FlSpot(last.x + 0.31, last.y + 0.1),
+                          FlSpot(last.x + 0.41, last.y + 0.21),
+                          FlSpot(last.x + 0.61, spots.first.y),
+                          FlSpot(last.x + 1.61, last.y + 0.21)
+                        ]);
+                      } else {
+                        lines++;
+                      }
                     });
                   },
                 ),
@@ -333,11 +342,12 @@ class LineChartSample1State extends State<LineChartSample1> {
         show: false,
       ),
     );
-    return [
+    final dataBars = [
       lineChartBarData1,
-      // lineChartBarData2,
-      // lineChartBarData3,
+      if (lines > 0) lineChartBarData2,
+      if (lines > 1) lineChartBarData3
     ];
+    return dataBars;
   }
 
   LineChartData sampleData2() {

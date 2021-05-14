@@ -42,6 +42,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   /// we handle under the hood animations (implicit animations) via this tween,
   /// it lerps between the old [LineChartData] to the new one.
   LineChartDataTween? _lineChartDataTween;
+  FlSpotsTweenList? _spotsTweenList;
   FlSpotsTween? _spotsTween;
 
   final List<ShowingTooltipIndicators> _showingTouchedTooltips = [];
@@ -76,14 +77,26 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     if (widget.useLineAnimation) {
       final temp = _lineChartDataTween!.evaluate(
           CurvedAnimation(parent: controller, curve: Interval(0, 0.45, curve: widget.curve)));
-      chart = temp.copyWith(lineBarsData: [
-        temp.lineBarsData.first.copyWith(
-            spots: _spotsTween!.evaluate(CurvedAnimation(
-                parent: controller, curve: Interval(0.50, 1, curve: Curves.easeInOut))))
-      ]);
+      final List<LineChartBarData> barData = [];
+      // print('len ${temp.lineBarsData.length}');
+      for (var i = 0; i < temp.lineBarsData.length; i++) {
+        List<FlSpot>? spotsTemp;
+        try {
+          spotsTemp = _spotsTweenList!
+              .evaluate(CurvedAnimation(
+                  parent: controller, curve: Interval(0.50, 1, curve: widget.lineAnimationCurve)))
+              .toList()[i];
+        } catch (e) {}
+        if (spotsTemp != null) {
+          final tempData = temp.lineBarsData[i].copyWith(spots: spotsTemp);
+          barData.add(tempData);
+        }
+      }
+      chart = temp.copyWith(lineBarsData: barData);
     } else {
       chart = _lineChartDataTween!.evaluate(animation);
     }
+    // print('chart data ${chart.lineBarsData.length}');
 
     return GestureDetector(
       onLongPressStart: (details) {},
@@ -232,6 +245,15 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         return FlSpotsTween(begin: value, end: widget.data.lineBarsData.first.spots);
       },
     ) as FlSpotsTween;
+
+    _spotsTweenList = visitor(
+      _spotsTweenList,
+      _getData().lineBarsData.map((e) => e.spots).toList(),
+      (dynamic value) {
+        return FlSpotsTweenList(
+            begin: value, end: widget.data.lineBarsData.map((e) => e.spots).toList());
+      },
+    ) as FlSpotsTweenList;
     // print(_lineChartDataTween?.begin?.lineBarsData.first.spots.length);
     // print(_lineChartDataTween?.end?.lineBarsData.first.spots.length);
     // print('kekWait ok');
