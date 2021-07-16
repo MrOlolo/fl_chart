@@ -9,13 +9,9 @@ class LineChartSample1 extends StatefulWidget {
 }
 
 class LineChartSample1State extends State<LineChartSample1> {
-<<<<<<< HEAD
-  bool isShowingMainData;
-  List<FlSpot> spots;
-  int lines = 0;
-=======
   late bool isShowingMainData;
->>>>>>> master
+  late List<FlSpot> spots;
+  int lines = 0;
 
   @override
   void initState() {
@@ -533,18 +529,18 @@ class LineChartSample1State extends State<LineChartSample1> {
 }
 
 class MyPainter extends CustomPainter {
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
   final String text;
   final List<FlSpot> lineForText;
-  final List<FlSpot> anotherLine;
+  final List<FlSpot>? anotherLine;
   final double leftTitleSize;
   final double bottomTitleSize;
-  final double maxX, maxY, minX, minY;
+  final double? maxX, maxY, minX, minY;
 
   MyPainter({
     this.textStyle,
     this.text = 'text',
-    @required this.lineForText,
+    required this.lineForText,
     this.anotherLine,
     this.leftTitleSize = 0,
     this.bottomTitleSize = 0,
@@ -557,10 +553,10 @@ class MyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     print(size);
-    final Size newSize = (size - Offset(leftTitleSize, bottomTitleSize));
+    final newSize = (size - Offset(leftTitleSize, bottomTitleSize)) as Size;
 
-    double _maxX = 0, _maxY = 0;
-    double _minX = double.maxFinite, _minY = double.maxFinite;
+    var _maxX = 0.0, _maxY = 0.0;
+    var _minX = double.maxFinite, _minY = double.maxFinite;
     final len = max(lineForText.length, anotherLine?.length ?? 0);
     for (var i = 0; i < len; i++) {
       if ((lineForText?.length ?? 0) > i) {
@@ -570,17 +566,17 @@ class MyPainter extends CustomPainter {
         _minY = min(_minY, lineForText[i].y);
       }
       if ((anotherLine?.length ?? 0) > i) {
-        _maxX = max(_maxX, anotherLine[i].x);
-        _maxY = max(_maxY, anotherLine[i].y);
-        _minX = min(_minX, anotherLine[i].x);
-        _minY = min(_minY, anotherLine[i].y);
+        _maxX = max(_maxX, anotherLine![i].x);
+        _maxY = max(_maxY, anotherLine![i].y);
+        _minX = min(_minX, anotherLine![i].x);
+        _minY = min(_minY, anotherLine![i].y);
       }
     }
 
-    if (minX != null) _minX = min(_minX, minX);
-    if (minY != null) _minY = min(_minY, minY);
-    if (maxX != null) _maxX = max(_maxX, maxX);
-    if (maxY != null) _maxY = max(_maxY, maxY);
+    if (minX != null) _minX = min(_minX, minX!);
+    if (minY != null) _minY = min(_minY, minY!);
+    if (maxX != null) _maxX = max(_maxX, maxX!);
+    if (maxY != null) _maxY = max(_maxY, maxY!);
 
     final xAxisLen = _maxX - _minX;
     final yAxisLen = _maxY - _minY;
@@ -596,30 +592,30 @@ class MyPainter extends CustomPainter {
     print('width ${newSize.width}');
     print('height ${newSize.height * 0.8 / 4}');
 
-    Paint line = new Paint()
+    var line = Paint()
       ..color = Colors.black
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8;
-    Paint complete = new Paint()
+    var complete = Paint()
       ..color = Colors.white
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8;
 
-    Offset center = new Offset(size.width / 2, size.height / 2);
-    double radius = min(size.width / 2, size.height / 2);
+    var center = Offset(size.width / 2, size.height / 2);
+    var radius = min(size.width / 2, size.height / 2);
 
     // canvas.drawRect(Offset(38, 0) & newSize, line);
 
-    TextSpan span = new TextSpan(style: textStyle, text: '——   ' + text);
-    TextPainter tp = new TextPainter(text: span, textDirection: TextDirection.ltr);
+    var span = TextSpan(style: textStyle, text: '——   ' + text);
+    var tp = TextPainter(text: span, textDirection: TextDirection.ltr);
     tp.layout();
     canvas.save();
     canvas.translate(tp.height + leftTitleSize, newSize.height);
     canvas.rotate(-atan2((lineForText.last.y - lineForText.first.y) / yAxisLen * newSize.height,
         (lineForText.last.x - lineForText.first.x) / xAxisLen * newSize.width));
-    tp.paint(canvas, new Offset(newSize.width - tp.width, 0));
+    tp.paint(canvas, Offset(newSize.width - tp.width, 0));
     // optional, if you saved earlier
     canvas.restore();
     canvas.drawPoints(
@@ -630,7 +626,7 @@ class MyPainter extends CustomPainter {
         ],
         complete);
 
-    tp.paint(canvas, new Offset(newSize.width - tp.width + leftTitleSize, newSize.height));
+    tp.paint(canvas, Offset(newSize.width - tp.width + leftTitleSize, newSize.height));
   }
 
   @override
@@ -670,14 +666,14 @@ class FlDotCirclePainterWithArrows extends FlDotPainter {
   /// by setting the thickness with [strokeWidth],
   /// and you can change the color of of the stroke with [strokeColor].
   FlDotCirclePainterWithArrows({
-    Color color,
-    double radius,
-    Color strokeColor,
-    double strokeWidth,
-    List<Shadow> shadow,
-    bool showHints,
-    bool disableRightHint,
-    bool disableLeftHint,
+    Color? color,
+    double? radius,
+    Color? strokeColor,
+    double? strokeWidth,
+    List<Shadow>? shadow,
+    bool? showHints,
+    bool? disableRightHint,
+    bool? disableLeftHint,
   })  : color = color ?? Colors.green,
         radius = radius ?? 4.0,
         strokeColor = strokeColor ?? Colors.green,
