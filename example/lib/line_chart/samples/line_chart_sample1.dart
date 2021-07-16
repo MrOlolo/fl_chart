@@ -559,7 +559,7 @@ class MyPainter extends CustomPainter {
     var _minX = double.maxFinite, _minY = double.maxFinite;
     final len = max(lineForText.length, anotherLine?.length ?? 0);
     for (var i = 0; i < len; i++) {
-      if ((lineForText?.length ?? 0) > i) {
+      if (lineForText.length > i) {
         _maxX = max(_maxX, lineForText[i].x);
         _maxY = max(_maxY, lineForText[i].y);
         _minX = min(_minX, lineForText[i].x);
