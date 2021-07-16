@@ -1561,6 +1561,9 @@ class LineTouchTooltipData with EquatableMixin {
   /// Showing tooltip at Y-axis
   final bool customTooltipLabelsShowAtAxisY;
 
+  /// Controls the rotation of the tooltip.
+  final double rotateAngle;
+
   /// if [LineTouchData.handleBuiltInTouches] is true,
   /// [LineChart] shows a tooltip popup on top of spots automatically when touch happens,
   /// otherwise you can show it manually using [LineChartData.showingTooltipIndicators].
@@ -1587,6 +1590,7 @@ class LineTouchTooltipData with EquatableMixin {
     bool? customTooltipLabels,
     bool? customTooltipLabelsShowAtAxisY,
     bool? customTooltipLabelsShowAtAxisX,
+    double? rotateAngle,
   })  : tooltipBgColor = tooltipBgColor ?? Colors.white,
         tooltipRoundedRadius = tooltipRoundedRadius ?? 4,
         tooltipPadding = tooltipPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1599,6 +1603,7 @@ class LineTouchTooltipData with EquatableMixin {
         customTooltipLabels = customTooltipLabels ?? false,
         customTooltipLabelsShowAtAxisY = customTooltipLabelsShowAtAxisY ?? true,
         customTooltipLabelsShowAtAxisX = customTooltipLabelsShowAtAxisX ?? true,
+        rotateAngle = rotateAngle ?? 0.0,
         super();
 
   /// Used for equality check, see [EquatableMixin].
@@ -1616,6 +1621,7 @@ class LineTouchTooltipData with EquatableMixin {
         customTooltipLabels,
         customTooltipLabelsShowAtAxisX,
         customTooltipLabelsShowAtAxisY,
+        rotateAngle
       ];
 }
 
@@ -1763,22 +1769,16 @@ class TouchedSpotIndicatorData with EquatableMixin {
 
 /// Holds data for showing tooltips over a line
 class ShowingTooltipIndicators with EquatableMixin {
-  /// Determines in which line these tooltips should be shown.
-  final int lineIndex;
-
   /// Determines the spots that each tooltip should be shown.
   final List<LineBarSpot> showingSpots;
 
   /// [LineChart] shows some tooltips over each [LineChartBarData],
-  /// [lineIndex] determines the index of [LineChartBarData],
   /// and [showingSpots] determines in which spots this tooltip should be shown.
-  ShowingTooltipIndicators(int lineIndex, List<LineBarSpot> showingSpots)
-      : lineIndex = lineIndex,
-        showingSpots = showingSpots;
+  ShowingTooltipIndicators(List<LineBarSpot> showingSpots) : showingSpots = showingSpots;
 
   /// Used for equality check, see [EquatableMixin].
   @override
-  List<Object?> get props => [lineIndex, showingSpots];
+  List<Object?> get props => [showingSpots];
 }
 
 /// [LineChart]'s touch callback.

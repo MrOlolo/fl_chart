@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 /// Low level LineChart Widget.
 class LineChartLeaf extends LeafRenderObjectWidget {
@@ -31,7 +32,7 @@ class LineChartLeaf extends LeafRenderObjectWidget {
 }
 
 /// Renders our LineChart, also handles hitTest.
-class RenderLineChart extends RenderBox {
+class RenderLineChart extends RenderBox implements MouseTrackerAnnotation {
   RenderLineChart(LineChartData data, LineChartData targetData, double textScale,
       LineTouchCallback? touchCallback)
       : _data = data,
@@ -76,6 +77,8 @@ class RenderLineChart extends RenderBox {
 
   List<LineBarSpot>? _lastTouchedSpots;
 
+  late bool _validForMouseTracker;
+
   @override
   void performLayout() {
     size = computeDryLayout(constraints);
@@ -101,6 +104,24 @@ class RenderLineChart extends RenderBox {
   @override
   void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
+    _handleEvent(event);
+  }
+
+  @override
+  PointerExitEventListener? get onExit => (PointerExitEvent event) {
+        _handleEvent(event);
+      };
+
+  @override
+  PointerEnterEventListener? get onEnter => null;
+
+  @override
+  MouseCursor get cursor => MouseCursor.defer;
+
+  @override
+  bool get validForMouseTracker => _validForMouseTracker;
+
+  void _handleEvent(PointerEvent event) {
     if (_touchCallback == null) {
       return;
     }
@@ -108,7 +129,7 @@ class RenderLineChart extends RenderBox {
 
     var touchedSpots = _painter.handleTouch(event, size, paintHolder);
     if (touchedSpots == null || touchedSpots.isEmpty) {
-      _touchCallback!.call(response);
+      _touchCallback?.call(response);
       return;
     }
     response = response.copyWith(lineBarSpots: touchedSpots);
@@ -122,6 +143,18 @@ class RenderLineChart extends RenderBox {
       _lastTouchedSpots = null;
     }
 
-    _touchCallback!.call(response);
+    _touchCallback?.call(response);
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _validForMouseTracker = true;
+  }
+
+  @override
+  void detach() {
+    _validForMouseTracker = false;
+    super.detach();
   }
 }

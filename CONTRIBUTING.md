@@ -8,11 +8,13 @@ Make sure you have Flutter installed and on your path.
 
 Follow these steps to clone FL Chart and set up the development environment:
 
-1. Clone the project: `git clone https://github.com/imaNNeoFighT/fl_chart.git`
+1. Fork the repository
 
-2. Go into the cloned directory: `cd fl_chart`
+2. Clone the project, you can find it in your repositories: `git clone https://github.com/your-username/fl_chart.git`
 
-3. Install all packages: `flutter packages get`
+3. Go into the cloned directory: `cd fl_chart`
+
+4. Install all packages: `flutter packages get`
 
 ## Before Modifying the Code
 
@@ -32,6 +34,10 @@ We made the CanvasWrapper class, because we wanted to test draw functions.
 CanvasWrapper class holds a canvas and all draw functions proxies through it.
 You should use it for drawing on the canvas, Instead of direct accessing to canvas.
 It makes draw functions testable.
+
+<img src="https://github.com/imaNNeoFighT/fl_chart/raw/master/repo_files/images/architecture/fl_chart_architecture.jpg" />
+
+(made with [draw.io](https://drive.google.com/file/d/1bj-2TqTRUh80dRKJk10drPNeA3fp3EA8/view))
 
 
 ## Checking Your Code's Quality

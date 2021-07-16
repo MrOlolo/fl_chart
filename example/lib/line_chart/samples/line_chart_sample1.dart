@@ -9,9 +9,13 @@ class LineChartSample1 extends StatefulWidget {
 }
 
 class LineChartSample1State extends State<LineChartSample1> {
+<<<<<<< HEAD
   bool isShowingMainData;
   List<FlSpot> spots;
   int lines = 0;
+=======
+  late bool isShowingMainData;
+>>>>>>> master
 
   @override
   void initState() {
@@ -324,7 +328,7 @@ class LineChartSample1State extends State<LineChartSample1> {
         show: false,
       ),
     );
-    final LineChartBarData lineChartBarData2 = LineChartBarData(
+    final lineChartBarData2 = LineChartBarData(
       spots: [
         FlSpot(1, 1),
         FlSpot(3, 2.8),
@@ -346,7 +350,7 @@ class LineChartSample1State extends State<LineChartSample1> {
         const Color(0x00aa4cfc),
       ]),
     );
-    final LineChartBarData lineChartBarData3 = LineChartBarData(
+    final lineChartBarData3 = LineChartBarData(
       spots: [
         FlSpot(1, 2.8),
         FlSpot(3, 1.9),

@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 
 import 'bar_chart/bar_chart_page.dart';
 import 'bar_chart/bar_chart_page2.dart';
+import 'bar_chart/bar_chart_page3.dart';
 import 'line_chart/line_chart_page.dart';
 import 'line_chart/line_chart_page2.dart';
 import 'line_chart/line_chart_page3.dart';
 import 'line_chart/line_chart_page4.dart';
 import 'pie_chart/pie_chart_page.dart';
+import 'utils/platform_info.dart';
 import 'scatter_chart/scatter_chart_page.dart';
 
 void main() => runApp(MyApp());
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -52,15 +54,19 @@ class _MyHomePageState extends State<MyHomePage> {
     LineChartPage2(),
     LineChartPage3(),
     LineChartPage4(),
+    BarChartPage3(),
     ScatterChartPage(),
     RadarChartPage(),
   ];
 
+  bool get isDesktopOrWeb => PlatformInfo().isDesktopOS() || PlatformInfo().isWeb();
+
   @override
   void initState() {
+    super.initState();
     _controller.addListener(() {
       setState(() {
-        _currentPage = _controller.page.round();
+        _currentPage = _controller.page!.round();
       });
     });
   }
@@ -75,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: _pages,
         ),
       ),
-      bottomNavigationBar: kIsWeb
+      bottomNavigationBar: isDesktopOrWeb
           ? Container(
               padding: EdgeInsets.all(16),
               color: Colors.transparent,

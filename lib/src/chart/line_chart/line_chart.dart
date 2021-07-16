@@ -62,12 +62,10 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
       _showingTouchedTooltips.clear();
       _showingTouchedIndicators.clear();
-      _showingTouchedTooltips.add(ShowingTooltipIndicators(
-          0,
-          showingData.lineBarsData
-              .map((barData) => LineBarSpot(
-                  barData, showingData.lineBarsData.indexOf(barData), barData.spots.last))
-              .toList()));
+      _showingTouchedTooltips.add(ShowingTooltipIndicators(showingData.lineBarsData
+          .map((barData) =>
+              LineBarSpot(barData, showingData.lineBarsData.indexOf(barData), barData.spots.last))
+          .toList()));
     }
 
     /// Wr wrapped our chart with [GestureDetector], and onLongPressStart callback.
@@ -114,12 +112,10 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     }
 
     if (_showingTouchedTooltips.isEmpty && widget.data.alwaysShowTouchIndicator) {
-      _showingTouchedTooltips.add(ShowingTooltipIndicators(
-          0,
-          lineChartData.lineBarsData
-              .map((barData) => LineBarSpot(
-                  barData, lineChartData.lineBarsData.indexOf(barData), barData.spots.last))
-              .toList()));
+      _showingTouchedTooltips.add(ShowingTooltipIndicators(lineChartData.lineBarsData
+          .map((barData) =>
+              LineBarSpot(barData, lineChartData.lineBarsData.indexOf(barData), barData.spots.last))
+          .toList()));
     }
 
     return lineChartData.copyWith(
@@ -178,7 +174,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
         if (sortedLineSpots.isNotEmpty && widget.data.alwaysShowTouchIndicator) {
           _showingTouchedTooltips.clear();
-          _showingTouchedTooltips.add(ShowingTooltipIndicators(0, sortedLineSpots));
+          _showingTouchedTooltips.add(ShowingTooltipIndicators(sortedLineSpots));
         }
         // _showingTouchedTooltips.clear();
         // _showingTouchedTooltips.add(ShowingTooltipIndicators(0, sortedLineSpots));
