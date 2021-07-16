@@ -898,13 +898,14 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
           canvasWrapper.save();
           // canvasWrapper.translate(x + tp.width / 2, y + tp.height / 2);
           canvasWrapper.translate(11 + tp.width / 2, y + tp.height / 2);
-          canvasWrapper.rotate(radians(leftTitles.rotateAngle));
+          // canvasWrapper.rotate(radians(leftTitles.rotateAngle));
           canvasWrapper.translate(-(x + tp.width / 2), -(y + tp.height / 2));
-          y -= translateRotatedPosition(tp.width, leftTitles.rotateAngle);
-          canvasWrapper.drawText(tp, Offset(x, y));
-          canvasWrapper.restore();
+          // y -= translateRotatedPosition(tp.width, leftTitles.rotateAngle);
+          // canvasWrapper.drawText(tp, Offset(x, y));
+
           x += calculateRotationOffset(tp.size, leftTitles.rotateAngle).dx;
           canvasWrapper.drawText(tp, Offset(x, y), leftTitles.rotateAngle);
+          canvasWrapper.restore();
         }
         if (data.maxY - verticalSeek < leftInterval && data.maxY != verticalSeek) {
           verticalSeek = data.maxY;

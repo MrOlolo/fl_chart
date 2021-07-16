@@ -43,7 +43,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   /// it lerps between the old [LineChartData] to the new one.
   LineChartDataTween? _lineChartDataTween;
   FlSpotsTweenList? _spotsTweenList;
-  FlSpotsTween? _spotsTween;
+  // FlSpotsTween? _spotsTween;
 
   final List<ShowingTooltipIndicators> _showingTouchedTooltips = [];
 
@@ -75,7 +75,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     if (widget.useLineAnimation) {
       final temp = _lineChartDataTween!.evaluate(
           CurvedAnimation(parent: controller, curve: Interval(0, 0.45, curve: widget.curve)));
-      final List<LineChartBarData> barData = [];
+      final barData = <LineChartBarData>[];
       // print('len ${temp.lineBarsData.length}');
       for (var i = 0; i < temp.lineBarsData.length; i++) {
         List<FlSpot>? spotsTemp;
@@ -234,13 +234,13 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
       },
     ) as LineChartDataTween;
 
-    _spotsTween = visitor(
-      _spotsTween,
-      _getData().lineBarsData.first.spots,
-      (dynamic value) {
-        return FlSpotsTween(begin: value, end: widget.data.lineBarsData.first.spots);
-      },
-    ) as FlSpotsTween;
+    // _spotsTween = visitor(
+    //   _spotsTween,
+    //   _getData().lineBarsData.first.spots,
+    //   (dynamic value) {
+    //     return FlSpotsTween(begin: value, end: widget.data.lineBarsData.first.spots);
+    //   },
+    // ) as FlSpotsTween;
 
     _spotsTweenList = visitor(
       _spotsTweenList,
